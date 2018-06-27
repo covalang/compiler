@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
 using Antlr4.Runtime;
 
 namespace Cova
@@ -22,14 +24,36 @@ end";
 			var lexer = new GyooLexer(stream);
 			var tokens = new CommonTokenStream(lexer);
 			var parser = new GyooParser(tokens);
-			var what = new GyooVisitor();
+			var what = new GyooVisitor<Int32>();
             what.Visit(parser.program());
         }
     }
 
-    class GyooVisitor : GyooBaseVisitor<Int32> {
-        public override Int32 VisitAssign(GyooParser.AssignContext context) {
-            return 42;
+    class GyooVisitor<TResult> : GyooBaseVisitor<TResult> {
+        private readonly Dictionary<String, BigInteger> variables = new Dictionary<String, BigInteger>();
+
+        public override TResult VisitAdd(GyooParser.AddContext context) {
+            var sourceId = context.GetChild(1).GetText();
+            var destinationId = context.GetChild(3).GetText();
+            if (BigInteger.TryParse(sourceId, out var number))
+                variables[destinationId] += number;
+            else
+                variables[destinationId] += variables[sourceId];
+            return default;
+        }
+        public override TResult VisitPrint(GyooParser.PrintContext context) {
+            var id = context.GetChild(1).GetText();
+            if (BigInteger.TryParse(id, out var number))
+                Console.WriteLine(number);
+            else
+                Console.WriteLine(variables[id]);
+            return default;
+        }
+        public override TResult VisitAssign(GyooParser.AssignContext context) {
+            var id = context.GetChild(1).GetText();
+            var number = BigInteger.Parse(context.GetChild(3).GetText());
+            variables.Add(id, number);
+            return default;
         }
     }
 }

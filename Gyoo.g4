@@ -9,4 +9,4 @@ add       : 'add' (NUMBER | ID) 'to' ID ;
 
 ID     : [a-z]+ ;
 NUMBER : [0-9]+ ;
-WS     : [ \n\t]+ -> skip;
+WS     : [ \r\n\t]+ -> skip;
