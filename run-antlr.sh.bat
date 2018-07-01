@@ -1,1 +1,0 @@
-java -jar antlr-4.7.1-complete.jar ./*.g4 -Dlanguage=CSharp -no-listener -visitor -o AntlrOutput
