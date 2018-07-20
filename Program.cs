@@ -1,59 +1,172 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using Antlr4.Runtime;
+using System.Globalization;
+using System.IO;
+using System.IO.MemoryMappedFiles;
 
 namespace Cova
 {
     class Program
     {
+		class CompliationUnit
+		{
+			public List<UseDirective> UseDirectives { get; } = new List<UseDirective>();
+			public List<Type>         Types         { get; } = new List<Type>();
+		}
+
+		class UseDirective
+		{
+			public String Namespace { get; set; }
+		}
+
+		class Type
+		{
+			public Visibility Visibility               { get; set; }
+			public Storage Storage                     { get; set; }
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name                         { get; set; }
+			public Kind Kind                           { get; set; }
+
+			public List<Field> Fields                  { get; } = new List<Field>();
+			public List<Property> Properties           { get; } = new List<Property>();
+			public List<Method> Methods                { get; } = new List<Method>();
+		}
+
+		enum Kind : byte
+		{
+			Class,
+			Primitive,
+			Trait,
+			Interface
+		}
+
+		enum Visibility : byte
+		{
+			Public,
+			Private,
+			Internal,
+			Protected
+		}
+
+		enum Storage : byte
+		{
+			Static,
+			Instance
+		}
+
+		enum ReferralSemantics : byte
+		{
+			Value,
+			Reference,
+			Tag,
+
+		}
+
+		class Field
+		{
+			public Visibility Visibility               { get; set; }
+			public Storage Storage                     { get; set; }
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name                         { get; set; }
+			public Type Type                           { get; set; }
+		}
+
+		class Property
+		{
+			public Visibility GetterVisibility         { get; set; }
+			public Visibility SetterVisibility         { get; set; }
+			public Storage Storage                     { get; set; }
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name                         { get; set; }
+			public Type Type                           { get; set; }
+		}
+
+		class Method
+		{
+			public Visibility Visibility               { get; set; }
+			public Storage Storage                     { get; set; }
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name                         { get; set; }
+			public Type ReturnType                     { get; set; }
+
+			public List<Parameter>Parameters           { get; } = new List<Parameter>();
+			public List<Local> Locals                  { get; } = new List<Local>();
+			public List<Statement>Statements           { get; } = new List<Statement>();
+		}
+
+		class Parameter
+		{
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name                         { get; set; }
+			public Type Type                           { get; set; }
+		}
+
+		class Local
+		{
+			public Storage Storage { get; set; }
+			public ReferralSemantics ReferralSemantics { get; set; }
+			public String Name { get; set; }
+			public Type Type { get; set; }
+		}
+
+		class Statement
+		{
+			public List<Expression> Expressions { get; } = new List<Expression>();
+		}
+
+		class Expression
+		{
+		}
+
         static void Main(String[] args)
         {
-            var input = 
-@"begin
-    let a be 5
-    let b be 10
-    add 3 to b
-    add b to a
-    add a to b
-    print b
-    print 3
-end";
+	        var main = File.ReadAllText("Main.cova");
+			var lexemes = new List<Object>();
+			for (int i = 0; i < main.Length; i++)
+			{
+				var ros = main.AsSpan(0);
+				if (ros.Contains("namespace".AsSpan()) == 0)
+					lexemes.Add("Namespace");
+			}
 
-            var stream = CharStreams.fromstring(input);
-			var lexer = new GyooLexer(stream);
-			var tokens = new CommonTokenStream(lexer);
-			var parser = new GyooParser(tokens);
-			var what = new GyooVisitor<Int32>();
-            what.Visit(parser.program());
+	        var si = new StringInfo(main);
+	        var tee = StringInfo.GetTextElementEnumerator(main);
+			var indices = StringInfo.ParseCombiningCharacters(main);
+			Int32 index = 0;
+			Int32 length = 0;
+			var graphemes = new List<(String @string, Int32 index, Int32 length)>();
+			while (tee.MoveNext())
+			{
+				if (tee.ElementIndex != 0)
+				index = tee.ElementIndex;
+			}
+			graphemes.Add((main, index, main.Length - length));
+			using (var mmf = MemoryMappedFile.CreateFromFile("Main.cova"))
+			using (var va = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read))
+			{
+				new ReadOnlyMemory<byte>();
+				new ReadOnlySpan<byte>();
+			}
+        }
+	}
+
+	class Grapheme {
+		public readonly String String;
+		public readonly Int32 Index;
+		public readonly Int32 Length;
+
+        public Grapheme(String @string, Int32 index, Int32 length)
+        {
         }
     }
 
-    class GyooVisitor<TResult> : GyooBaseVisitor<TResult> {
-        private readonly Dictionary<String, BigInteger> variables = new Dictionary<String, BigInteger>();
-
-        public override TResult VisitAdd(GyooParser.AddContext context) {
-            var sourceId = context.GetChild(1).GetText();
-            var destinationId = context.GetChild(3).GetText();
-            if (BigInteger.TryParse(sourceId, out var number))
-                variables[destinationId] += number;
-            else
-                variables[destinationId] += variables[sourceId];
-            return default;
-        }
-        public override TResult VisitPrint(GyooParser.PrintContext context) {
-            var id = context.GetChild(1).GetText();
-            if (BigInteger.TryParse(id, out var number))
-                Console.WriteLine(number);
-            else
-                Console.WriteLine(variables[id]);
-            return default;
-        }
-        public override TResult VisitAssign(GyooParser.AssignContext context) {
-            var id = context.GetChild(1).GetText();
-            var number = BigInteger.Parse(context.GetChild(3).GetText());
-            variables.Add(id, number);
-            return default;
-        }
-    }
+	static class StringExtensions
+	{
+		public static IEnumerable<String> AsTextElementEnumerable(this String s)
+		{
+			var enumerator = StringInfo.GetTextElementEnumerator(s);
+			while (enumerator.MoveNext())
+				yield return enumerator.GetTextElement();
+		}
+	}
 }

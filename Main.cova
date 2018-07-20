@@ -1,0 +1,16 @@
+﻿namespace Test🌍
+	type Program
+		-$ Env: Env
+		func main(args: String[])
+			Env.out.writeLine("test")
+			foreach (var arg in args)
+				Env.out.writeLine(arg)
+			let line = env.in.readLine()
+			foo()
+
+		func foo(): <I32, AsciiString>
+			Env.out.writeLine(foo.fullName)
+			var i: I64 = 0
+			i += 42
+			i *= 1337
+			return <i.cast<I32>(), "ok">
