@@ -1,22 +1,21 @@
 ﻿CompilationUnit
 	UseDirective*
 	NamespaceDeclaration*
-	Type*
+	TypeDeclaration*
 
 UseDirective
 	'use' NamespaceIdentifier
 
 NamespaceIdentifier
-	QualifiedIdentifier
-	
 QualifiedIdentifier
 	Identifier ('.' Identifier)*
-
-Identifier
-	[A-Za-z]+
 
 NamespaceDeclaration
 	'namespace' Space QualifiedIdentifier BeginScope NamespaceBody EndScope
 
-Type
-	
+NamespaceBody
+	TypeDeclaration*
+
+Keyword
+	'type'
+	'namespace'
