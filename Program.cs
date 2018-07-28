@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
+using System.Reflection;
+using Compiler;
 
 namespace Cova
 {
@@ -120,13 +123,63 @@ namespace Cova
 
         static void Main(String[] args)
         {
+	        var lines = File.ReadAllLines(@"C:\Users\nicks\Downloads\UnicodeData.txt");
+	        var asdf = new (UInt32, UnicodeCategory)[0x10ffff];
+	        for (UInt32 i = 0; i < lines.Length; i++)
+	        {
+		        var parts = lines[i].Split(';');
+		        var code = UInt32.Parse(parts[0], NumberStyles.HexNumber);
+		        if (parts[1].EndsWith("First>"))
+		        {
+			        i++;
+			        var parts2 = lines[i].Split(';');
+			        if (!parts2[1].EndsWith("Last>"))
+				        throw new Exception();
+			        asdf[i] = (code, Unicode.GetUniCat(parts[2]));
+			        var code2 = UInt32.Parse(parts2[0], NumberStyles.HexNumber);
+			        for (UInt32 j = code; j <= code2; j++)
+				        asdf[i] = (code, Unicode.GetUniCat(parts2[2]));
+			        continue;
+		        }
+		        var uc1 = Unicode.GetUniCat(parts[2]);
+		        var uc2 = CharUnicodeInfo.GetUnicodeCategory((Int32)code);
+		        if (uc1 != uc2)
+			        ;
+		        asdf[i] = (code, uc1);
+	        }
+
+	        for (var i = 0; i < asdf.Length; i++)
+	        {
+		        if (asdf[i].Item1 != i)
+			        throw new Exception();
+	        }
+
+
+			//      var methods = typeof(CharUnicodeInfo).GetMethods(BindingFlags.Static | BindingFlags.NonPublic)/*.Where(x => x.Name == "InternalGetUnicodeCategory").ToArray()*/;
+			//      var method = typeof(CharUnicodeInfo).GetMethod("InternalGetCategoryValue", BindingFlags.Static | BindingFlags.NonPublic);
+
+			//var what = (Func<int, int, UnicodeCategory>)method
+			//	.CreateDelegate(typeof(Func<int, int, UnicodeCategory>));
+			//Console.WriteLine(what.Invoke(1, 0));
+			for (var i = 0; i != Int32.MaxValue - 1; i++)
+			{
+				var uc1 = CharUnicodeInfo.GetUnicodeCategory(i);
+				var uc2 = Unicode.GetUnicodeCategory((UInt32) i);
+				if (uc1 != uc2)
+				{
+					var c = (char)i;
+					throw new Exception(c.ToString());
+				}
+			}
+
+	        return;
 	        var main = File.ReadAllText("Main.cova");
 			var lexemes = new List<Object>();
 			for (int i = 0; i < main.Length; i++)
 			{
 				var ros = main.AsSpan(0);
-				if (ros.Contains("namespace".AsSpan()) == 0)
-					lexemes.Add("Namespace");
+				//if (ros.Contains("namespace".AsSpan()) == 0)
+				//	lexemes.Add("Namespace");
 			}
 
 	        var si = new StringInfo(main);
