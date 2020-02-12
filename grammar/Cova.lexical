@@ -1,5 +1,0 @@
-﻿Space
-	'\u0020'
-
-Identifier
-	[A-Za-z] ()+

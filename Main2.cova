@@ -1,0 +1,16 @@
+﻿module Test.Cova
+	
+	type Program
+		func Foo
+			bar = true
+			baz = false
+
+
+	type Brogram
+		type Yes
+			func Woo
+				ok = false
+	module NestedModule
+		type Class
+			func Method
+				variable = true

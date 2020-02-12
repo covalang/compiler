@@ -1,4 +1,4 @@
-﻿namespace Test🌍.Cova
+﻿namespace Test.Cova
 	$type Program
 		-$env Env
 
