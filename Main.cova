@@ -1,15 +1,15 @@
 ﻿namespace Test🌍.Cova
-	$type Program
-		-$env Env
+	type Program
+		-$ env Env
 
-		-$func main(args []String)
+		-$ func main(args []String)
 			Env.out.writeLine("test")
 			foreach (var arg in args)
 				Env.out.writeLine(arg)
 			let line = env.in.readLine()
 			foo()
 
-		+$func foo() <I32, AsciiString>
+		+$^	func foo() <I32, AsciiString>
 			Env.out.writeLine(foo.fullName)
 			var i: I64 = 0
 			i += 42
