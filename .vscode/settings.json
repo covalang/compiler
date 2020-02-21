@@ -2,8 +2,11 @@
 	"antlr4.generation": {
 		"outputDir": ".antlr",
 		"mode": "external",
-		"language": "CSharp",
-		"listeners": false,
+		"language": "Cpp",
+		"listeners": true,
 		"visitors": true
+	},
+	"files.associations": {
+		"queue": "cpp"
 	}
 }

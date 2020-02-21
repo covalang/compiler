@@ -11,8 +11,8 @@ relation
 
 a == b
 a <= b
-a >< 1 to 3
-a <> 3 to 6
+a >< 1..3
+a <> 3..6
 
 
 

@@ -2,7 +2,6 @@ parser grammar CovaParser;
 
 options {
 	tokenVocab = CovaLexer;
-	language = CSharp;
 }
 
 file: (NEWLINE | moduleMemberDeclaration)* EOF;
