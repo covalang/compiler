@@ -32,7 +32,7 @@ class IndentationLexerBase : public antlr4::Lexer {
   		return token;
   	}
 
-public:
+protected:
 	template<size_t IndentToken, size_t DedentToken, size_t NewLineToken>
 	std::unique_ptr<antlr4::Token> nextTokenWithIndentation()
 	{
@@ -94,7 +94,6 @@ public:
 		return result;
 	}
 
-protected:
 	IndentationLexerBase(antlr4::CharStream * input) : antlr4::Lexer(input) {}
 
 	void foundNewLine() {

@@ -1,19 +1,22 @@
 lexer grammar CovaLexer;
 
+options {
+	superClass = IndentationLexerBase_;
+}
 
 @lexer::header {
 	#include "IndentationLexerBase.hpp"
 	typedef IndentationLexerBase<> IndentationLexerBase_;
 }
 
-@lexer::members {
-	virtual std::unique_ptr<antlr4::Token> nextToken() override {
-		return nextTokenWithIndentation<Indent, Dedent, NewLine>();
-	}
+@lexer::declarations {
+	virtual std::unique_ptr<antlr4::Token> nextToken() override;
 }
 
-options {
-	superClass = IndentationLexerBase_;
+@lexer::definitions {
+	std::unique_ptr<antlr4::Token> CovaLexer::nextToken() {
+		return nextTokenWithIndentation<Indent, Dedent, NewLine>();
+	}
 }
 
 tokens { Indent, Dedent }
