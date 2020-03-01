@@ -4,51 +4,67 @@ options {
 	tokenVocab = CovaLexer;
 }
 
-file: (NEWLINE | moduleMemberDeclaration)* EOF;
+file: (NewLine | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-blockStart: NEWLINE INDENT;
-blockContinue: NEWLINE;
-blockEnd: DEDENT;
+blockStart: NewLine Indent;
+blockContinue: NewLine;
+blockEnd: Dedent;
 
-moduleMemberDeclaration
-	: moduleDeclaration
-	| typeDeclaration
-	// | interfaceDefinition
-	// | enumDefinition
-	// | delegateDefinition
+namespaceMemberDefinition
+	: namespaceDefinition
+	| typeDefinition
 	;
 
-moduleDeclaration
-	: Module Whitespace qualifiedIdentifier moduleBody?
+namespaceDefinition
+	: Namespace Whitespace qualifiedIdentifier namespaceBody?
 	;
 
 qualifiedIdentifier
-	: Identifier (Dot Identifier)*
+	: identifier (Dot identifier)*
 	;
 
-moduleBody
-	: blockStart (blockContinue | moduleMemberDeclaration)* blockEnd
-	//{ Console.WriteLine("moduleBody"); }
+identifier
+	: Identifier
 	;
 
-typeDeclaration
-	: Type Whitespace Identifier typeBody?
+namespaceBody
+	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
+	//{ Console.WriteLine("namespaceBody"); }
+	;
+
+typeDefinition
+	: visibilityModifier? Type Whitespace identifier (Whitespace typeKind)? typeBody?
+	;
+
+visibilityModifier
+	: Public
+	| Private
+	| Protected
+	| Internal
+	;
+
+typeKind
+	: Enum
+	| Struct
+	| Interface
+	| Trait
+	| Delegate
 	;
 
 typeBody
-	: blockStart (blockContinue | typeMemberDeclaration)* blockEnd
+	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
 	//{ Console.WriteLine("typeBody"); }
 	;
 
-typeMemberDeclaration
-	: typeDeclaration
-	| functionDeclaration
+typeMemberDefinition
+	: typeDefinition
+	| functionDefinition
 	;
 
-functionDeclaration
-	: Func Whitespace Identifier functionBody?
+functionDefinition
+	: visibilityModifier? Func Whitespace identifier functionBody?
 	;
 
 functionBody
@@ -57,7 +73,7 @@ functionBody
 	;
 
 statement
-	: Identifier Whitespace EqualsSign Whitespace booleanLiteral
+	: identifier Whitespace EqualsSign Whitespace booleanLiteral
 	//{ Console.WriteLine("statement"); }
 	;
 

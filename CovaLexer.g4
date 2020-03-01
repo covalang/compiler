@@ -24,9 +24,21 @@ tokens { Indent, Dedent }
 // Keywords
 
 Use: 'use';
-Module: 'module';
+Namespace: 'namespace';
 Type: 'type';
+	Enum: 'enum';
+	// Class: 'class';
+	Struct: 'struct';
+	Interface: 'interface';
+	Trait: 'trait';
+	Delegate: 'delegate';
 Func: 'func';
+
+Public: '+';
+Private: '-';
+Protected: '#';
+Internal: '~';
+
 True: 'true';
 False: 'false';
 
@@ -36,7 +48,7 @@ EqualsSign: '=';
 // Lexical rules
 
 Identifier
-	: [_A-Za-z][_A-Za-z0-9]+
+	: [_A-Za-z][_A-Za-z0-9]*
 	//: IdentifierStartCharacter IdentifierPartCharacter*
 	;
 
