@@ -1,14 +1,16 @@
 #ifndef INDENTATIONLEXERBASE_HPP_INCLUDED
 #define INDENTATIONLEXERBASE_HPP_INCLUDED
 
-#include <string>
-#include <stack>
 #include <queue>
+#include <stack>
+#include <string>
+#include <type_traits>
 
 #include "antlr4-runtime.h"
 
 template<typename T = void>
-class IndentationLexerBase : public antlr4::Lexer {
+class IndentationLexerBase_ : public antlr4::Lexer {
+	static_assert(std::is_same<T, void>::value, " T must be `void`");
 
   	// Initializing `pendingDent` to true means any whitespace at the beginning
   	// of the file will trigger an INDENT, which will probably be a syntax error,
