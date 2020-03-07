@@ -26,6 +26,18 @@ PrivateVisibility: Minus;
 ProtectedVisibility: Octothorp;
 InternalVisibility: Tilde;
 
+// Storage types
+
+StaticStorageType : '$';
+InstanceStorageType : '|';
+
+// Keywords/tokens
+
+True: 'true';
+False: 'false';
+
+Arrow: '->';
+
 LessThanOrEqual: '<=';
 GreaterThanOrEqual: '>=';
 LessThan: '<';
@@ -44,9 +56,6 @@ Modulo: '%';
 Plus: '+';
 Octothorp: '#';
 Tilde: '~';
-
-True: 'true';
-False: 'false';
 
 Dot: '.';
 EqualsSign: '=';

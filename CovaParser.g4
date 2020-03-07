@@ -55,6 +55,10 @@ visibility : publicVisibility | privateVisibility | protectedVisibility | intern
 	protectedVisibility : ProtectedVisibility;
 	internalVisibility : InternalVisibility;
 
+storageType : staticStorageType | instanceStorageType;
+	staticStorageType : StaticStorageType;
+	instanceStorageType : InstanceStorageType;
+
 typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
 	enumTypeKind : Enum;
 	structTypeKind : Struct;
