@@ -26,5 +26,3 @@ Indentations
 	: '\t'+
 	{ foundIndentations(); }
 	;
-
-Whitespace: ' '+;

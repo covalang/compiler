@@ -1,7 +1,11 @@
-﻿module Test.Cova
+﻿type ok
+	func main
+		Test.Cova.Foo()
+
+namespace Test.Cova
 	
-	type Program
-		func Foo
+	+type Program
+		+func Foo
 			bar = true
 			baz = false
 
@@ -10,7 +14,10 @@
 		type Yes
 			func Woo
 				ok = false
-	module NestedModule
+
+	namespace NestedModule
+
 		type Class
+
 			func Method
 				variable = true

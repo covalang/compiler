@@ -18,7 +18,27 @@ namespaceMemberDefinition
 	;
 
 namespaceDefinition
-	: Namespace Whitespace qualifiedIdentifier namespaceBody?
+	: Namespace Space qualifiedIdentifier namespaceBody?
+	;
+
+namespaceBody
+	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
+	;
+
+typeDefinition
+	: visibility? Type Space identifier (Space typeKind)? typeBody?
+	;
+
+typeBody
+	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
+	;
+
+functionDefinition
+	: visibility? Func Space identifier body?
+	;
+
+body
+	: blockStart (blockContinue | statement)* blockEnd
 	;
 
 qualifiedIdentifier
@@ -29,52 +49,50 @@ identifier
 	: Identifier
 	;
 
-namespaceBody
-	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
-	//{ Console.WriteLine("namespaceBody"); }
-	;
+visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
+	publicVisibility : PublicVisibility;
+	privateVisibility : PrivateVisibility;
+	protectedVisibility : ProtectedVisibility;
+	internalVisibility : InternalVisibility;
 
-typeDefinition
-	: visibilityModifier? Type Whitespace identifier (Whitespace typeKind)? typeBody?
-	;
-
-visibilityModifier
-	: Public
-	| Private
-	| Protected
-	| Internal
-	;
-
-typeKind
-	: Enum
-	| Struct
-	| Interface
-	| Trait
-	| Delegate
-	;
-
-typeBody
-	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
-	//{ Console.WriteLine("typeBody"); }
-	;
+typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
+	enumTypeKind : Enum;
+	structTypeKind : Struct;
+	interfaceTypeKind : Interface;
+	traitTypeKind : Trait;
+	delegateTypeKind : Delegate;
 
 typeMemberDefinition
 	: typeDefinition
 	| functionDefinition
 	;
 
-functionDefinition
-	: visibilityModifier? Func Whitespace identifier functionBody?
-	;
-
-functionBody
-	: blockStart (blockContinue | statement)* blockEnd
-	//{ Console.WriteLine("functionBody"); }
-	;
-
 statement
-	: identifier Whitespace EqualsSign Whitespace booleanLiteral
-	//{ Console.WriteLine("statement"); }
+	: assignment
+	| invocation
+	;
+
+assignment : identifier Space assignmentOperator Space expression;
+	assignmentOperator: EqualsSign;
+
+invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
+	arguments: expression (Comma expression)*;
+
+expression
+	: expression Power expression                                                              #powerExpression
+	| Minus expression                                                                         #unaryMinusExpression
+	| Not expression                                                                           #notExpression
+	| expression op=(Multiply | Divide | Modulo) expression                            #multiplicationExpression
+	| expression op=(Plus | Minus) expression                                                  #additiveExpression
+	| expression op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) expression #relationalExpression
+	| expression op=(Equal | NotEqual) expression                                              #equalityExpression
+	| expression And expression                                                                #andExpression
+	| expression Or expression                                                                 #orExpression
+	| atom                                                                                     #atomExpression
+	;
+
+atom
+	: booleanLiteral
 	;
 
 booleanLiteral

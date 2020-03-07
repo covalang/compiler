@@ -96,7 +96,7 @@ protected:
 		return result;
 	}
 
-	IndentationLexerBase(antlr4::CharStream * input) : antlr4::Lexer(input) {}
+	IndentationLexerBase_(antlr4::CharStream * input) : antlr4::Lexer(input) {}
 
 	void foundNewLine() {
 		if (pendingDent)

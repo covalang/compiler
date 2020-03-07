@@ -19,16 +19,48 @@ Type: 'type';
 	Delegate: 'delegate';
 Func: 'func';
 
-Public: '+';
-Private: '-';
-Protected: '#';
-Internal: '~';
+// Visibility modifiers
+
+PublicVisibility: Plus;
+PrivateVisibility: Minus;
+ProtectedVisibility: Octothorp;
+InternalVisibility: Tilde;
+
+LessThanOrEqual: '<=';
+GreaterThanOrEqual: '>=';
+LessThan: '<';
+GreaterThan: '>';
+NotEqual: '!=';
+Equal: '==';
+And: 'and';
+Or: 'or';
+
+Power: '**';
+Minus: '-';
+Not: 'not';
+Multiply: '*';
+Divide: '/';
+Modulo: '%';
+Plus: '+';
+Octothorp: '#';
+Tilde: '~';
 
 True: 'true';
 False: 'false';
 
 Dot: '.';
 EqualsSign: '=';
+
+LeftParenthesis: '(';
+RightParenthesis: ')';
+LeftBrace: '{';
+RightBrace: '}';
+LeftBracket: '[';
+RightBracket: ']';
+SemiColon: ';';
+Comma: ',';
+
+Space: ' ';
 
 // Lexical rules
 

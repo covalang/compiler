@@ -1,0 +1,41 @@
+let nums = [1 2 3]
+
+let sum = nums for n -> var x @ += n
+let product = nums for n var *= y
+
+let reversed = nums.reverse()
+
+let first = nums for n get 1
+let last = nums for n get ^1
+
+let strings =
+	nums for n
+	get n.toString()
+
+Env.writeLine([1 2 3] for n set x += n.toString());
+
+type Foo 
+
+
+
+
+name System
+	type Iterator<T> + interface
+	type Range<T> + interface
+
+	type + Vector<T> class <- Iterator Range
+		field count @ USize +r -w = 0
+		field data * Array<T> -- = []
+
+		prop this[index @ USize]
+			get => 
+
+		func new()
+			count = 0
+			data = [];
+
+		func + push(element T)
+			count += 1
+			if count > data.count
+				data = new Array<T>(count.bits.leadingZeroCount)
+			data[count - 1] = element
