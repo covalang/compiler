@@ -33,9 +33,26 @@ typeBody
 	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
 	;
 
-functionDefinition
-	: visibility? Func Space identifier body?
+typeMemberDefinition
+	: typeDefinition
+	| fieldDefinition
+	| propertyDefinition
+	| functionDefinition
 	;
+
+fieldDefinition
+	: Field Space visibility? storageType? identifier Space qualifiedIdentifier
+	;
+
+propertyDefinition
+	: Prop Space visibility? storageType? identifier Space qualifiedIdentifier
+	;
+
+functionDefinition
+	: visibility? Func Space identifier (LeftParenthesis parameters RightParenthesis)? body?
+	;
+	parameters: parameter (Comma parameter)*;
+	parameter: identifier Space qualifiedIdentifier;
 
 body
 	: blockStart (blockContinue | statement)* blockEnd
@@ -50,10 +67,10 @@ identifier
 	;
 
 visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
-	publicVisibility : PublicVisibility;
-	privateVisibility : PrivateVisibility;
-	protectedVisibility : ProtectedVisibility;
-	internalVisibility : InternalVisibility;
+	publicVisibility : Plus;
+	privateVisibility : Minus;
+	protectedVisibility : Octothorp;
+	internalVisibility : Tilde;
 
 storageType : staticStorageType | instanceStorageType;
 	staticStorageType : StaticStorageType;
@@ -66,40 +83,45 @@ typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | d
 	traitTypeKind : Trait;
 	delegateTypeKind : Delegate;
 
-typeMemberDefinition
-	: typeDefinition
-	| functionDefinition
-	;
-
 statement
 	: assignment
 	| invocation
+	| local
 	;
 
-assignment : identifier Space assignmentOperator Space expression;
+local: Local Space identifier (Space qualifiedIdentifier)? (Space EqualsSign Space expression)?;
+
+assignment : qualifiedIdentifier Space assignmentOperator Space expression;
 	assignmentOperator: EqualsSign;
 
 invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
 	arguments: expression (Comma expression)*;
 
 expression
-	: expression Power expression                                                              #powerExpression
-	| Minus expression                                                                         #unaryMinusExpression
-	| Not expression                                                                           #notExpression
-	| expression op=(Multiply | Divide | Modulo) expression                            #multiplicationExpression
-	| expression op=(Plus | Minus) expression                                                  #additiveExpression
-	| expression op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) expression #relationalExpression
-	| expression op=(Equal | NotEqual) expression                                              #equalityExpression
-	| expression And expression                                                                #andExpression
-	| expression Or expression                                                                 #orExpression
-	| atom                                                                                     #atomExpression
+	: expression Power expression                                                                            #powerExpression
+	| Minus expression                                                                                       #unaryMinusExpression
+	| Not expression                                                                                         #notExpression
+	| expression Space? op=(Multiply | Divide | Modulo) Space? expression                                    #multiplicationExpression
+	| expression Space? op=(Plus | Minus) Space? expression                                                  #additiveExpression
+	| expression Space? op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) Space? expression #relationalExpression
+	| expression Space? op=(Equal | NotEqual) Space? expression                                              #equalityExpression
+	| expression Space? And Space? expression                                                                #andExpression
+	| expression Space? Or Space? expression                                                                 #orExpression
+	| atom                                                                                                   #atomExpression
 	;
 
 atom
 	: booleanLiteral
+	| integerLiteral
+	| stringLiteral
+	| qualifiedIdentifier
 	;
 
 booleanLiteral
 	: True
 	| False
 	;
+
+integerLiteral: IntegerLiteral;
+
+stringLiteral: StringLiteral;

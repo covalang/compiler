@@ -1,11 +1,18 @@
 ﻿type ok
+	field text String
 	func main
 		Test.Cova.Foo()
+		what(1 + 2)
+		local text String
+		local text2 String = ""
+		local text3 = ""
+		local text4 String
+		this.text = text
 
 namespace Test.Cova
 	
 	+type Program
-		+func Foo
+		+func Foo(wat I32)
 			bar = true
 			baz = false
 

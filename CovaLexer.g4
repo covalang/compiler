@@ -17,14 +17,10 @@ Type: 'type';
 	Interface: 'interface';
 	Trait: 'trait';
 	Delegate: 'delegate';
+Field: 'field';
+Prop: 'prop';
 Func: 'func';
-
-// Visibility modifiers
-
-PublicVisibility: Plus;
-PrivateVisibility: Minus;
-ProtectedVisibility: Octothorp;
-InternalVisibility: Tilde;
+Local: 'local';
 
 // Storage types
 
@@ -77,3 +73,7 @@ Identifier
 	: [_A-Za-z][_A-Za-z0-9]*
 	//: IdentifierStartCharacter IdentifierPartCharacter*
 	;
+
+IntegerLiteral: [0-9][0-9_]*;
+
+StringLiteral: '"' ('\\"' | ~'"')* '"';

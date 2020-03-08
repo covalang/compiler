@@ -120,6 +120,7 @@ int main(int argc, const char* argv[]) {
 	// for (auto const & token : lexer.getAllTokens())
 	// 	std::cout << token->getText() << ", ";
 	// lexer.reset();
+	// return 0;
 
 	CommonTokenStream tokens(&lexer);
 	CovaParser parser(&tokens);
