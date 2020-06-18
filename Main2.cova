@@ -7,6 +7,7 @@
 		local text2 String = ""
 		local text3 = ""
 		local text4 String
+		local pi = 0x_deadbeef_f16
 		this.text = text
 
 namespace Test.Cova

@@ -24,7 +24,7 @@ struct CompilationUnit : Base {
 	std::vector<Type> types;
 };
 
-std::string join(char const * delimiter, std::vector<std::string const> const & strings) {
+std::string join(char const * delimiter, std::vector<std::string> const & strings) {
 	size_t size = 0;
 	for (auto i = 0; i != strings.size(); ++i)
 		size += strings[i].size() + 1;
@@ -40,7 +40,7 @@ std::string join(char const * delimiter, std::vector<std::string const> const & 
 
 class Listener : public CovaParserBaseListener
 {
-	vector<string const> qualifiers;
+	vector<string> qualifiers;
 
 	string getFullyQualifiedName() {
 		return join(".", qualifiers);
