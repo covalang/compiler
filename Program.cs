@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using System.Linq;
 
 [assembly: System.CLSCompliant(false)]
 
-namespace Antlr4Testing
+namespace Cova
 {
 	class Program
 	{
@@ -22,33 +23,15 @@ namespace Antlr4Testing
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);
 			var package = new Package("cova");
-			Process(parser.file(), package);
-		}
 
-		static void Process(CovaParser.FileContext fc, Package package)
-		{
-			foreach (var mmdc in fc.moduleMemberDeclaration())
-				Process(mmdc, package);
+			var listener = new CovaListener();
+			ParseTreeWalker.Default.Walk(listener, parser.file());
 		}
+	}
 
-		static void Process(CovaParser.ModuleMemberDeclarationContext mmdc, Package package)
-		{
-			if (mmdc.moduleDeclaration() is CovaParser.ModuleDeclarationContext mdc)
-				Process(mdc, package.);
-			if (mmdc.typeDeclaration() is CovaParser.TypeDeclarationContext tdc)
-				Process(tdc, package);
-		}
-
-		static void Process(List<Module> modules, CovaParser.ModuleDeclarationContext mdc)
-		{
-			Console.WriteLine(mdc.qualifiedIdentifier().Identifier(0).GetText());
-		}
-
-		static void Process(CovaParser.TypeDeclarationContext tdc, List<Type> types)
-		{
-
-			Console.WriteLine(tdc.Identifier().GetText());
-		}
+	class CovaListener : CovaParserBaseListener
+	{
+		
 	}
 
 	class Raii : IDisposable

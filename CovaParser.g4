@@ -2,67 +2,130 @@ parser grammar CovaParser;
 
 options {
 	tokenVocab = CovaLexer;
-	language = CSharp;
 }
 
-file: (NEWLINE | moduleMemberDeclaration)* EOF;
+@header {
+	#pragma warning disable 3021
+}
+
+file: (NewLine | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-blockStart: NEWLINE INDENT;
-blockContinue: NEWLINE;
-blockEnd: DEDENT;
+blockStart: NewLine Indent;
+blockContinue: NewLine;
+blockEnd: Dedent;
 
-moduleMemberDeclaration
-	: moduleDeclaration
-	| typeDeclaration
-	// | interfaceDefinition
-	// | enumDefinition
-	// | delegateDefinition
+namespaceMemberDefinition
+	: namespaceDefinition
+	| typeDefinition
 	;
 
-moduleDeclaration
-	: Module Whitespace qualifiedIdentifier moduleBody?
+namespaceDefinition
+	: Namespace Space qualifiedIdentifier namespaceBody?
 	;
 
-qualifiedIdentifier
-	: Identifier (Dot Identifier)*
+namespaceBody
+	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
 	;
 
-moduleBody
-	: blockStart (blockContinue | moduleMemberDeclaration)* blockEnd
-	//{ Console.WriteLine("moduleBody"); }
-	;
-
-typeDeclaration
-	: Type Whitespace Identifier typeBody?
+typeDefinition
+	: visibility? Type Space identifier (Space typeKind)? typeBody?
 	;
 
 typeBody
-	: blockStart (blockContinue | typeMemberDeclaration)* blockEnd
-	//{ Console.WriteLine("typeBody"); }
+	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
 	;
 
-typeMemberDeclaration
-	: typeDeclaration
-	| functionDeclaration
+typeMemberDefinition
+	: typeDefinition
+	| fieldDefinition
+	| propertyDefinition
+	| functionDefinition
 	;
 
-functionDeclaration
-	: Func Whitespace Identifier functionBody?
+fieldDefinition
+	: Field Space visibility? storageType? identifier Space qualifiedIdentifier
 	;
 
-functionBody
+propertyDefinition
+	: Prop Space visibility? storageType? identifier Space qualifiedIdentifier
+	;
+
+functionDefinition
+	: visibility? Func Space identifier (LeftParenthesis parameters RightParenthesis)? body?
+	;
+	parameters: parameter (Comma parameter)*;
+	parameter: identifier Space qualifiedIdentifier;
+
+body
 	: blockStart (blockContinue | statement)* blockEnd
-	//{ Console.WriteLine("functionBody"); }
 	;
+
+qualifiedIdentifier
+	: identifier (Dot identifier)*
+	;
+
+identifier
+	: Identifier
+	;
+
+visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
+	publicVisibility : Plus;
+	privateVisibility : Minus;
+	protectedVisibility : Octothorp;
+	internalVisibility : Tilde;
+
+storageType : staticStorageType | instanceStorageType;
+	staticStorageType : StaticStorageType;
+	instanceStorageType : InstanceStorageType;
+
+typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
+	enumTypeKind : Enum;
+	structTypeKind : Struct;
+	interfaceTypeKind : Interface;
+	traitTypeKind : Trait;
+	delegateTypeKind : Delegate;
 
 statement
-	: Identifier Whitespace EqualsSign Whitespace booleanLiteral
-	//{ Console.WriteLine("statement"); }
+	: assignment
+	| invocation
+	| local
+	;
+
+local: Local Space identifier (Space qualifiedIdentifier)? (Space EqualsSign Space expression)?;
+
+assignment : qualifiedIdentifier Space assignmentOperator Space expression;
+	assignmentOperator: EqualsSign;
+
+invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
+	arguments: expression (Comma expression)*;
+
+expression
+	: expression Power expression                                                                            #powerExpression
+	| Minus expression                                                                                       #unaryMinusExpression
+	| Not expression                                                                                         #notExpression
+	| expression Space? op=(Multiply | Divide | Modulo) Space? expression                                    #multiplicationExpression
+	| expression Space? op=(Plus | Minus) Space? expression                                                  #additiveExpression
+	| expression Space? op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) Space? expression #relationalExpression
+	| expression Space? op=(Equal | NotEqual) Space? expression                                              #equalityExpression
+	| expression Space? And Space? expression                                                                #andExpression
+	| expression Space? Or Space? expression                                                                 #orExpression
+	| atom                                                                                                   #atomExpression
+	;
+
+atom
+	: booleanLiteral
+	| integerLiteral
+	| stringLiteral
+	| qualifiedIdentifier
 	;
 
 booleanLiteral
 	: True
 	| False
 	;
+
+integerLiteral: IntegerLiteral;
+
+stringLiteral: StringLiteral;
