@@ -1,0 +1,5 @@
+namespace Foo {
+	type Bar {
+		func Baz {}
+	}
+}

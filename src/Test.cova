@@ -1,0 +1,9 @@
+type Foo
+	func Bar
+		Env.writeLine("hello")
+
+type Foo -> func Bar -> Env.writeLine("hello")
+
+type Foo {
+		func Bar { Env.writeLine("hello") }
+}

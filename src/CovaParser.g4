@@ -8,12 +8,20 @@ options {
 	#pragma warning disable 3021
 }
 
-file: (NewLine | namespaceMemberDefinition)* EOF;
+file: (Newline | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-blockStart: NewLine Indent;
-blockContinue: NewLine;
+singleLineStart: Space Arrow whitespace?;
+singleLineEnd:  whitespace? Newline;
+
+whitespace: (Space | Newline | Indent | Dedent | Tab | Whitespace)+;
+braceBlockStart:  Space LeftBrace whitespace?;
+braceBlockContinue: whitespace? SemiColon whitespace?;
+braceBlockEnd: whitespace? LeftBrace;
+
+blockStart: Newline Indent;
+blockContinue: Newline;
 blockEnd: Dedent;
 
 namespaceMemberDefinition
@@ -27,6 +35,8 @@ namespaceDefinition
 
 namespaceBody
 	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
+	| braceBlockStart (braceBlockContinue | namespaceMemberDefinition)* braceBlockEnd
+	| singleLineStart namespaceMemberDefinition singleLineEnd
 	;
 
 typeDefinition
@@ -35,6 +45,8 @@ typeDefinition
 
 typeBody
 	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
+	| braceBlockStart (braceBlockContinue | typeMemberDefinition)* braceBlockEnd
+	| singleLineStart typeMemberDefinition singleLineEnd
 	;
 
 typeMemberDefinition
@@ -60,6 +72,8 @@ functionDefinition
 
 body
 	: blockStart (blockContinue | statement)* blockEnd
+	| braceBlockStart (braceBlockContinue | statement)* braceBlockEnd
+	| singleLineStart statement singleLineEnd
 	;
 
 qualifiedIdentifier

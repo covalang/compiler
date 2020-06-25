@@ -17,8 +17,9 @@ namespace Cova
 			var inputStream = new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
-			//Console.WriteLine(String.Join(", ", lexer.GetAllTokens().Select(x => x.Text)));
-			//lexer.Reset();
+			Console.WriteLine(String.Join(", ", lexer.GetAllTokens().Select(x => x.Text)));
+			lexer.Reset();
+			return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);
