@@ -36,13 +36,14 @@ public abstract class NewlineModeLexerBase : Antlr4.Runtime.Lexer
 
 	public override IToken NextToken()
 	{
-		
 		if (tokenQueue.Count > 0)
 			return tokenQueue.Dequeue();
 
 		IToken next = base.NextToken();
 		if (next == null)
 			throw new Exception("WTF! next is null");
+
+		NewlineMode mode;
 
 		if (next.Type == SingleLineBeginToken)
 		{
@@ -58,29 +59,32 @@ public abstract class NewlineModeLexerBase : Antlr4.Runtime.Lexer
 
 		if (next.Type == MultiLineEndToken)
 		{
-			newlineModeStack.TryPeek(out var topMode);
-			if (topMode == NewlineMode.Insensitive)
+			QueueSingleLineTokens();
+			newlineModeStack.TryPeek(out mode);
+			if (mode == NewlineMode.Insensitive)
 				newlineModeStack.Pop();
-			return next;
+			tokenQueue.Enqueue(next);
+			return tokenQueue.Dequeue();
 		}
 
 		if (next.Type == Eof)
 		{
+			QueueSingleLineTokens();
 			while (dentLevel > 0)
 			{
-				tokenQueue.Enqueue(createToken(DedentToken, "Dedent", next, next));
+				tokenQueue.Enqueue(createToken(DedentToken, "<Dedent>", next, next));
 				--dentLevel;
 			}
 			tokenQueue.Enqueue(next);
 			return tokenQueue.Dequeue();
 		}
 
-		if (next.Type != NewlineToken)
+		if (next.Type != NewlineToken & next.Type != Eof)
 		{
 			return next;
 		}
 
-		newlineModeStack.TryPeek(out var mode);
+		newlineModeStack.TryPeek(out mode);
 		switch (mode)
 		{
 			case NewlineMode.Dented:
@@ -105,12 +109,12 @@ public abstract class NewlineModeLexerBase : Antlr4.Runtime.Lexer
 				{
 					if (indentationTokenCount > dentLevel)
 					{
-						tokenQueue.Enqueue(createToken(IndentToken, "Indent", next, hold));
+						tokenQueue.Enqueue(createToken(IndentToken, "<Indent>", next, hold));
 						++dentLevel;
 					}
 					else
 					{
-						tokenQueue.Enqueue(createToken(DedentToken, "Dedent", next, hold));
+						tokenQueue.Enqueue(createToken(DedentToken, "<Dedent>", next, hold));
 						--dentLevel;
 					}
 				}
@@ -124,7 +128,7 @@ public abstract class NewlineModeLexerBase : Antlr4.Runtime.Lexer
 				do
 				{
 					newlineModeStack.Pop();
-					var singleLineEnd = createToken(SingleLineEndToken, "SingleLineEnd", next, hold);
+					var singleLineEnd = createToken(SingleLineEndToken, "<SingleLineEnd>", next, hold);
 					tokenQueue.Enqueue(singleLineEnd);
 				}
 				while (newlineModeStack.TryPeek(out mode) && mode == NewlineMode.SingleLine);
@@ -133,10 +137,22 @@ public abstract class NewlineModeLexerBase : Antlr4.Runtime.Lexer
 			}
 
 			case NewlineMode.Insensitive:
-				return next;
+				QueueSingleLineTokens();
+				tokenQueue.Enqueue(next);
+				return tokenQueue.Dequeue();
 
 			default:
 				throw new InvalidOperationException("Newline mode not supported: " + mode.ToString());
+		}
+
+		void QueueSingleLineTokens()
+		{
+			while (newlineModeStack.TryPeek(out mode) && mode == NewlineMode.SingleLine)
+			{
+				newlineModeStack.Pop();
+				var singleLineEnd = createToken(SingleLineEndToken, "<SingleLineEnd>", next, next);
+				tokenQueue.Enqueue(singleLineEnd);
+			}
 		}
 	}
 }
