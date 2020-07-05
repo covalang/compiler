@@ -1,5 +1,5 @@
 ﻿namespace Test.Cova
-		
+
 	type Program { func Foo { bar = true; baz = false } }
 
 
@@ -13,5 +13,11 @@
 				variable = true
 
 namespace Strupat -> +type Nick -> +func Run -> Env.writeLine("hello")
+
+namespace Strupat -> +type Nick -> +func Run
+	Env.writeLine("hello")
+
+namespace Strupat -> +type Nick
+	+func Run -> Env.writeLine("hello")
 
 type Program { func Foo { bar = true; baz = false } }

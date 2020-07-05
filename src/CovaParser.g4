@@ -12,13 +12,13 @@ file: (Newline | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-singleLineStart: Space Arrow whitespace?;
+singleLineStart: whitespace? Arrow whitespace?;
 singleLineEnd:  whitespace? Newline;
 
-whitespace: (Space | Newline | Indent | Dedent | Tab | Whitespace)+;
-braceBlockStart:  Space LeftBrace whitespace?;
+whitespace: (Newline | Indent | Dedent | Tab | Whitespace)+;
+braceBlockStart: whitespace? LeftBrace whitespace?;
 braceBlockContinue: whitespace? SemiColon whitespace?;
-braceBlockEnd: whitespace? LeftBrace;
+braceBlockEnd: whitespace? LeftBrace whitespace?;
 
 blockStart: Newline Indent;
 blockContinue: Newline;
