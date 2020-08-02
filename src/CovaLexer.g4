@@ -14,22 +14,8 @@ tokens { Indent, Dedent, SingleLineEnd }
 }
 
 @lexer::members {
-	protected override Int32 NewlineToken => Newline;
-
-	protected override Int32 IndentationToken => Tab;
-	protected override Int32 IndentToken => Indent;
-	protected override Int32 DedentToken => Dedent;
-
-	protected override Int32 SingleLineBeginToken => Arrow;
-	protected override Int32 SingleLineEndToken => SingleLineEnd;
-
-	protected override Int32 MultiLineBeginToken => LeftBrace;
-	protected override Int32 MultiLineEndToken => RightBrace;
-	// public override IToken NextToken() => NextTokenWithIndentation(NewLine, Indent, Dedent);
-	// public enum WhitespaceMode { BracedInsensitive, SingleLineInsensitive }
-	// readonly Stack<WhitespaceMode> WhitespaceModeStack = new Stack<WhitespaceMode>();
-	// Boolean ModeIsOnTop(WhitespaceMode wm) => WhitespaceModeStack.TryPeek(out var top) && top == wm;
-	// public override void Reset() { WhitespaceModeStack.Clear(); base.Reset(); }
+	protected override SpecialTokenTypes Tokens { get; } =
+		new SpecialTokenTypes(Newline, (Tab, Indent, Dedent), (Arrow, SingleLineEnd), (LeftBrace, RightBrace));
 }
 
 // Keywords
@@ -100,12 +86,12 @@ IntegerLiteral: [0-9][0-9_]*;
 
 StringLiteral: '"' ('\\"' | ~'"')* '"';
 
-// Whitespace
-
 Arrow: '->';
 
 LeftBrace: '{';
 RightBrace: '}';
+
+// Whitespace
 
 //Space: ' ';
 

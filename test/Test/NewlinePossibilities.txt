@@ -1,0 +1,30 @@
+﻿namespace Foo
+	type Bar
+		func Baz
+			a = b
+
+namespace Foo -> type Bar
+	func Baz
+		a = b
+
+namespace Foo -> type Bar -> func Baz
+	a = b
+
+namespace Foo -> type Bar -> func Baz -> a = b
+
+
+namespace Foo
+	type Bar
+		func Baz -> a = b
+
+namespace Foo
+	type Bar -> func Baz -> a = b
+
+
+namespace Foo -> type Bar
+	func Baz -> a = b
+
+
+namespace Foo
+	type Bar -> func Baz
+		a = b

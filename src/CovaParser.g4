@@ -12,17 +12,18 @@ file: (Newline | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-singleLineStart: whitespace? Arrow whitespace?;
-singleLineEnd:  whitespace? Newline;
-
-whitespace: (Newline | Indent | Dedent | Tab | Whitespace)+;
-braceBlockStart: whitespace? LeftBrace whitespace?;
-braceBlockContinue: whitespace? SemiColon whitespace?;
-braceBlockEnd: whitespace? LeftBrace whitespace?;
-
 blockStart: Newline Indent;
 blockContinue: Newline;
 blockEnd: Dedent;
+
+singleLineStart: anyWhitespace? Arrow anyWhitespace?;
+singleLineEnd:  anyWhitespace? SingleLineEnd;
+
+braceBlockStart: anyWhitespace? LeftBrace anyWhitespace?;
+braceBlockContinue: anyWhitespace? SemiColon anyWhitespace?;
+braceBlockEnd: anyWhitespace? LeftBrace anyWhitespace?;
+
+anyWhitespace: (Newline | Tab | Whitespace)+;
 
 namespaceMemberDefinition
 	: namespaceDefinition
@@ -30,7 +31,7 @@ namespaceMemberDefinition
 	;
 
 namespaceDefinition
-	: Namespace Space qualifiedIdentifier namespaceBody?
+	: Namespace Whitespace+ qualifiedIdentifier namespaceBody?
 	;
 
 namespaceBody
@@ -40,7 +41,7 @@ namespaceBody
 	;
 
 typeDefinition
-	: visibility? Type Space identifier (Space typeKind)? typeBody?
+	: visibility? Type Whitespace+ identifier (Whitespace+ typeKind)? typeBody?
 	;
 
 typeBody
@@ -57,18 +58,18 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Space visibility? storageType? identifier Space qualifiedIdentifier
+	: Field Whitespace+ visibility? storageType? identifier Whitespace+ qualifiedIdentifier
 	;
 
 propertyDefinition
-	: Prop Space visibility? storageType? identifier Space qualifiedIdentifier
+	: Prop Whitespace+ visibility? storageType? identifier Whitespace+ qualifiedIdentifier
 	;
 
 functionDefinition
-	: visibility? Func Space identifier (LeftParenthesis parameters RightParenthesis)? body?
+	: visibility? Func Whitespace+ identifier (LeftParenthesis parameters RightParenthesis)? body?
 	;
 	parameters: parameter (Comma parameter)*;
-	parameter: identifier Space qualifiedIdentifier;
+	parameter: identifier Whitespace+ qualifiedIdentifier;
 
 body
 	: blockStart (blockContinue | statement)* blockEnd
@@ -107,9 +108,9 @@ statement
 	| local
 	;
 
-local: Local Space identifier (Space qualifiedIdentifier)? (Space EqualsSign Space expression)?;
+local: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ EqualsSign Whitespace+ expression)?;
 
-assignment : qualifiedIdentifier Space assignmentOperator Space expression;
+assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace+ expression;
 	assignmentOperator: EqualsSign;
 
 invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
@@ -119,12 +120,12 @@ expression
 	: expression Power expression                                                                            #powerExpression
 	| Minus expression                                                                                       #unaryMinusExpression
 	| Not expression                                                                                         #notExpression
-	| expression Space? op=(Multiply | Divide | Modulo) Space? expression                                    #multiplicationExpression
-	| expression Space? op=(Plus | Minus) Space? expression                                                  #additiveExpression
-	| expression Space? op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) Space? expression #relationalExpression
-	| expression Space? op=(Equal | NotEqual) Space? expression                                              #equalityExpression
-	| expression Space? And Space? expression                                                                #andExpression
-	| expression Space? Or Space? expression                                                                 #orExpression
+	| expression Whitespace+ op=(Multiply | Divide | Modulo) Whitespace+ expression                                    #multiplicationExpression
+	| expression Whitespace+ op=(Plus | Minus) Whitespace+ expression                                                  #additiveExpression
+	| expression Whitespace+ op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) Whitespace+ expression #relationalExpression
+	| expression Whitespace+ op=(Equal | NotEqual) Whitespace+ expression                                              #equalityExpression
+	| expression Whitespace+ And Whitespace+ expression                                                                #andExpression
+	| expression Whitespace+ Or Whitespace+ expression                                                                 #orExpression
 	| atom                                                                                                   #atomExpression
 	;
 

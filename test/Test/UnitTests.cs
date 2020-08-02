@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
@@ -58,6 +59,22 @@ namespace Foo
 			AssertSourceEqualsTokenized(expected, source);
 		}
 
+		[Fact]
+		public void DentedInsideTwoSingleLines()
+		{
+			var source = "namespace Foo -> type Bar -> func Baz\n\ta = b";
+			var expected = "namespace Foo -> type Bar -> func Baz\n\t<Indent>a = b<Dedent><SingleLineEnd><SingleLineEnd>";
+			AssertSourceEqualsTokenized(expected, source);
+		}
+
+		[Fact]
+		public void SingleLineInsideDentedInsideSingleLine()
+		{
+			var source = "namespace Foo -> type Bar\n\tfunc Baz -> a = b";
+			var expected = "namespace Foo -> type Bar\n\t<Indent>func Baz -> a = b<Dedent><SingleLineEnd><SingleLineEnd>";
+			AssertSourceEqualsTokenized(expected, source);
+		}
+
 		private void AssertSourceEqualsTokenized(String tokenized, String source)
 		{
 			var inputStream = new AntlrInputStream(source);
@@ -66,7 +83,7 @@ namespace Foo
 			Assert.Equal(tokenized, joinedTokens);
 		}
 
-		//[Theory]
+		[Theory]
 		[InlineData("Dented.cova")]
 		[InlineData("SameLine.cova")]
 		[InlineData("Braced.cova")]
@@ -95,6 +112,20 @@ namespace Foo
 			var func = Assert.Single(type.typeDefinition().typeBody().typeMemberDefinition());
 			Assert.Equal("Baz", func.functionDefinition().identifier().GetText());
 		}
+
+		[Theory]
+		[MemberData(nameof(Data))]
+		public void NewlinesFile(String source, String expected)
+		{
+			var inputStream = new AntlrInputStream(source);
+			var lexer = new CovaLexer(inputStream);
+			string joinedTokens = String.Join(String.Empty, lexer.GetAllTokens().Select(x => x.Text));
+			Assert.Equal(expected, joinedTokens);
+		}
+
+		public static IEnumerable<string[]> Data =>
+			from test in File.ReadAllText("Newlines.cova").Split("\n\n###\n\n")
+			select test.Split("\n===\n");
 	}
 
 	class TestListener : CovaParserBaseListener

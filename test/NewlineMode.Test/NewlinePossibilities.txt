@@ -1,0 +1,28 @@
+﻿n
+	t
+		f
+			s
+
+n -> t
+	f
+		s
+
+n -> t -> f
+	s
+
+n -> t -> f -> s
+
+
+n
+	t
+		f -> s
+
+n
+	t -> f -> s
+
+n -> t
+	f -> s
+
+n
+	t -> f
+		s

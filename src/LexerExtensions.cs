@@ -17,7 +17,7 @@ namespace Cova
 		{
 			return baseNextToken();
 
-			DentState GetState() => (DentState) state.GetValue(lexer, l => new DentState());
+			//DentState GetState() => (DentState) state.GetValue(lexer, l => new DentState());
 		}
 
 		class DentState
