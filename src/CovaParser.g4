@@ -12,16 +12,16 @@ file: (Newline | namespaceMemberDefinition)* EOF;
 
 //block: blockStart statement (blockContinue statement)* blockEnd;
 
-blockStart: Newline Indent;
-blockContinue: Newline;
+blockStart: Newline Tab* Indent;
+blockContinue: Newline Tab* | Comma;
 blockEnd: Dedent;
 
-singleLineStart: anyWhitespace? Arrow anyWhitespace?;
-singleLineEnd:  anyWhitespace? SingleLineEnd;
+singleLineStart: anyWhitespace? Arrow;
+singleLineEnd: anyWhitespace? SingleLineEnd;
 
-braceBlockStart: anyWhitespace? LeftBrace anyWhitespace?;
-braceBlockContinue: anyWhitespace? SemiColon anyWhitespace?;
-braceBlockEnd: anyWhitespace? LeftBrace anyWhitespace?;
+braceBlockStart: anyWhitespace? LeftBrace;
+braceBlockContinue: anyWhitespace? SemiColon;
+braceBlockEnd: anyWhitespace? LeftBrace;
 
 anyWhitespace: (Newline | Tab | Whitespace)+;
 
@@ -91,9 +91,9 @@ visibility : publicVisibility | privateVisibility | protectedVisibility | intern
 	protectedVisibility : Octothorp;
 	internalVisibility : Tilde;
 
-storageType : staticStorageType | instanceStorageType;
+storageType : staticStorageType;// | instanceStorageType;
 	staticStorageType : StaticStorageType;
-	instanceStorageType : InstanceStorageType;
+	//instanceStorageType : InstanceStorageType;
 
 typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
 	enumTypeKind : Enum;
@@ -105,33 +105,59 @@ typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | d
 statement
 	: assignment
 	| invocation
-	| local
+	| localDefinition
+	| localDeclaration
+	| expression
 	;
 
-local: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ EqualsSign Whitespace+ expression)?;
+localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
+localDeclaration: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ EqualsSign Whitespace+ expression)?;
 
 assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace+ expression;
 	assignmentOperator: EqualsSign;
 
 invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
 	arguments: expression (Comma expression)*;
+	
+binaryExpression
+	: unaryExpression binaryOperator unaryExpression
+	| binaryExpression binaryOperator unaryExpression
+    ;
+
+
 
 expression
-	: expression Power expression                                                                            #powerExpression
-	| Minus expression                                                                                       #unaryMinusExpression
-	| Not expression                                                                                         #notExpression
+	: Minus expression                                                                                                 #unaryMinusExpression
+	| Not expression                                                                                                   #notExpression
+	| expression Whitespace+ Power Whitespace+ expression                                                              #powerExpression
+	| Root Whitespace+ expression                                                                                      #unaryRootExpression
+	| expression Whitespace+ Root Whitespace+ expression                                                               #rootExpression
 	| expression Whitespace+ op=(Multiply | Divide | Modulo) Whitespace+ expression                                    #multiplicationExpression
 	| expression Whitespace+ op=(Plus | Minus) Whitespace+ expression                                                  #additiveExpression
 	| expression Whitespace+ op=(LessThanOrEqual | GreaterThanOrEqual | LessThan | GreaterThan) Whitespace+ expression #relationalExpression
 	| expression Whitespace+ op=(Equal | NotEqual) Whitespace+ expression                                              #equalityExpression
 	| expression Whitespace+ And Whitespace+ expression                                                                #andExpression
 	| expression Whitespace+ Or Whitespace+ expression                                                                 #orExpression
-	| atom                                                                                                   #atomExpression
+	| expression Whitespace+ op=(Within | Without) Whitespace+ expression                                              #rangeRelationalExpression
+	| expression Whitespace+ op=(Is | Isnt) qualifiedIdentifier                                                        #typeCheckExpression
+	| expression Whitespace* DoubleDot Whitespace* expression                                                          #rangeExpression
+	| expression Whitespace* DoubleDot Whitespace* expression Whitespace* Colon Whitespace* expression                 #sequenceExpression
+	| expression Whitespace* PlusMinus Whitespace* expression                                                          #intervalExpression
+	| expression Whitespace* Subset Whitespace* expression                                                             #subsetExpression
+	| expression Whitespace* Superset Whitespace* expression                                                           #supersetExpression
+	| expression Whitespace* ProperSubset Whitespace* expression                                                       #properSubsetExpression
+	| expression Whitespace* ProperSuperset Whitespace* expression                                                     #properSupersetExpression
+	| atom                                                                                                             #atomExpression
+	;
+
+arrayExpression
+	: LeftBracket expression (Comma expression)* RightBracket
 	;
 
 atom
 	: booleanLiteral
 	| integerLiteral
+	| realLiteral
 	| stringLiteral
 	| qualifiedIdentifier
 	;
@@ -142,5 +168,7 @@ booleanLiteral
 	;
 
 integerLiteral: IntegerLiteral;
+
+realLiteral: RealLiteral;
 
 stringLiteral: StringLiteral;

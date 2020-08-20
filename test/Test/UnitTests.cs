@@ -47,7 +47,7 @@ namespace Foo
 		public void SingleLineOnly()
 		{
 			var source = "namespace Foo -> type Bar -> func Baz -> a = b";
-			var expected = "namespace Foo -> type Bar -> func Baz -> a = b<SingleLineEnd><SingleLineEnd><SingleLineEnd>";
+			var expected = "namespace Foo -> type Bar -> func Baz -> a = b<ExpressionBodyEnd><ExpressionBodyEnd><ExpressionBodyEnd>";
 			AssertSourceEqualsTokenized(expected, source);
 		}
 
@@ -55,7 +55,7 @@ namespace Foo
 		public void SingleLineInsideInsensitiveOnly()
 		{
 			var source = "namespace Foo { type Bar -> func Baz {} }";
-			var expected = "namespace Foo { type Bar -> func Baz {} <SingleLineEnd>}";
+			var expected = "namespace Foo { type Bar -> func Baz {} <ExpressionBodyEnd>}";
 			AssertSourceEqualsTokenized(expected, source);
 		}
 
@@ -63,7 +63,7 @@ namespace Foo
 		public void DentedInsideTwoSingleLines()
 		{
 			var source = "namespace Foo -> type Bar -> func Baz\n\ta = b";
-			var expected = "namespace Foo -> type Bar -> func Baz\n\t<Indent>a = b<Dedent><SingleLineEnd><SingleLineEnd>";
+			var expected = "namespace Foo -> type Bar -> func Baz\n\t<Indent>a = b<Dedent><ExpressionBodyEnd><ExpressionBodyEnd>";
 			AssertSourceEqualsTokenized(expected, source);
 		}
 
@@ -71,7 +71,7 @@ namespace Foo
 		public void SingleLineInsideDentedInsideSingleLine()
 		{
 			var source = "namespace Foo -> type Bar\n\tfunc Baz -> a = b";
-			var expected = "namespace Foo -> type Bar\n\t<Indent>func Baz -> a = b<Dedent><SingleLineEnd><SingleLineEnd>";
+			var expected = "namespace Foo -> type Bar\n\t<Indent>func Baz -> a = b<Dedent><ExpressionBodyEnd><ExpressionBodyEnd>";
 			AssertSourceEqualsTokenized(expected, source);
 		}
 
@@ -123,9 +123,8 @@ namespace Foo
 			Assert.Equal(expected, joinedTokens);
 		}
 
-		public static IEnumerable<string[]> Data =>
-			from test in File.ReadAllText("Newlines.cova").Split("\n\n###\n\n")
-			select test.Split("\n===\n");
+		public static IEnumerable<String[]> Data =>
+			File.ReadAllText("Newlines.cova").Split("\n\n###\n\n").Select(x => x.Split("\n===\n"));
 	}
 
 	class TestListener : CovaParserBaseListener

@@ -1,20 +1,37 @@
+# Cova Programming Language
+
+
+
 arithmetic
 
 
 relation
-==
-!=
->=
-<=
-<>
-><
+```
+== equality
+!= inequality
+> greater-than
+< less-than
+>= greater-than-or-equal
+<= less-than-or-equal
+>< within
+<> without
 
-a == b
-a <= b
-a >< 1 to 3
-a <> 3 to 6
+'e' >< "hello" // true
+'z' <> "hello" // true
 
+"abc" \/ "bcd" // "abcd"
+"abc" >< "bcd" // "bc"
+"abc" <> "bcd" // "ad"
 
+scope (start, continue, end) vs statement (delimit on same line)
+
+Dented	\n\t{!n+1}	\n\t{n}	\n\t{n-1}	,
+Braced	{	;	}	;
+
+local nums = [1..3]
+nums map + ',' // ["1," "2," "3,"]
+nums fold + ',' // "1,2,3,"
+nums join ',' // "1,2,3"
 
 visibility modifiers
 +	public
@@ -74,3 +91,5 @@ number type storage size suffixes (bits)
 
 			if x == 5
 				doSomething();
+
+```

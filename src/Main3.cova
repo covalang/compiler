@@ -1,0 +1,9 @@
+﻿namespace Foo
+	type Bar
+		func Baz
+			local a = [1.22 .. 2.34 : 0.01]
+			local b = [a..b:c]
+			local nums = [0...4]
+			local evenNums = nums : 2
+			for evenNums 
+			x = 1 / 3

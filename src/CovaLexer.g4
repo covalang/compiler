@@ -14,8 +14,7 @@ tokens { Indent, Dedent, SingleLineEnd }
 }
 
 @lexer::members {
-	protected override SpecialTokenTypes Tokens { get; } =
-		new SpecialTokenTypes(Newline, (Tab, Indent, Dedent), (Arrow, SingleLineEnd), (LeftBrace, RightBrace));
+	protected override SpecialTokenTypes GetTokenTypes() => (Newline, (Tab, Indent, Dedent), (Arrow, SingleLineEnd), (LeftBrace, RightBrace));
 }
 
 // Keywords
@@ -25,7 +24,7 @@ Namespace: 'namespace';
 
 Type: 'type';
 Enum: 'enum';
-// Class: 'class';
+Class: 'class';
 Struct: 'struct';
 Interface: 'interface';
 Trait: 'trait';
@@ -39,41 +38,89 @@ Local: 'local';
 // Storage types
 
 StaticStorageType : '$';
-InstanceStorageType : '|';
+//InstanceStorageType : '|';
 
 // Keywords/tokens
 
+//Boolean
+
 True: 'true';
 False: 'false';
+BooleanLiteral: True | False;
 
-LessThanOrEqual: '<=';
-GreaterThanOrEqual: '>=';
-LessThan: '<';
-GreaterThan: '>';
-NotEqual: '!=';
+And: 'and' | '∧' | '/\\';
+Or: 'or' | '∨' | '\\/';
+Not: 'not' | '¬';
+
 Equal: '==';
-And: 'and';
-Or: 'or';
+NotEqual: '!=';
+Within: '><';
+Without: '<>';
+LessThanOrEqual: '<=' | '≤';
+LessThan: '<';
+GreaterThanOrEqual: '>=' | '≥';
+GreaterThan: '>';
 
-Power: '**';
+Is: 'is';
+Isnt: 'isnt';
+
+// Bitwise
+
+Ampersand: '&';
+VerticalBar: '|';
+Caret: '^';
+
+TripleLeftChevron: '<<<';
+DoubleLeftChevron: '<<';
+// LeftChevron: '<';
+
+TripleRightChevron: '>>>';
+DoubleRightChevron: '>>';
+// RightChevron: '>';
+
+PlusMinus: '±' | '+-';
+Plus: '+';
 Minus: '-';
-Not: 'not';
 Multiply: '*';
 Divide: '/';
 Modulo: '%';
-Plus: '+';
+Power: '**';
+Root: '//' | '√';
 Octothorp: '#';
 Tilde: '~';
 
+
+TripleDot: '...';
+DoubleDot: '..';
 Dot: '.';
+
 EqualsSign: '=';
 
 LeftParenthesis: '(';
 RightParenthesis: ')';
 LeftBracket: '[';
 RightBracket: ']';
+DoubleColon: '::';
+Colon: ':';
 SemiColon: ';';
 Comma: ',';
+
+// Sets
+
+// Membership (formal)
+EmptySet: '∅';
+Membership: '∈';
+NonMembership: '∉';
+
+// Subset (formal)
+Subset: '⊆';
+Superset: '⊇';
+ProperSubset: '⊂' | '⊊';
+ProperSuperset: '⊃' | '⊋';
+
+// Operations (formal)
+Union: '∪';
+Intersection: '∩';
 
 // Lexical rules
 
@@ -82,11 +129,32 @@ Identifier
 	//: IdentifierStartCharacter IdentifierPartCharacter*
 	;
 
-IntegerLiteral: [0-9][0-9_]*;
 
-StringLiteral: '"' ('\\"' | ~'"')* '"';
+IntegerLiteral: DecimalPrefix? IntegerDigit (DigitSeparator | IntegerDigit)*;
+RealLiteral: DecimalPrefix? IntegerLiteral+ Dot IntegerLiteral+;
+
+fragment DigitSeparator: '_';
+fragment IntegerDigit: [0-9];
+fragment HexadecimalDigit: [0-9a-fA-F];
+fragment BinaryDigit: [01];
+
+fragment DecimalPrefix: '0d';
+fragment HexadecimalPrefix: '0x';
+fragment BinaryPrefix: '0b';
+fragment UnicodePrefix: '0u';
+
+StringLiteral: '"' (EscapedCharacter | ~'"') '"';
+CharacterLiteral: '\'' (EscapedCharacter | ~'\'') '\'';
+
+fragment EscapedCharacter
+    : '\\' [0\\tnr"']
+    | '\\x' HexadecimalDigit HexadecimalDigit
+    | '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
+    | '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
+    ;
 
 Arrow: '->';
+FatArrow: '=>';
 
 LeftBrace: '{';
 RightBrace: '}';

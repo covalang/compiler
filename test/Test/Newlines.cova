@@ -36,7 +36,7 @@ type Foo3
 
 type Foo4 -> func Bar -> a = b
 ===
-type Foo4 -> func Bar -> a = b<SingleLineEnd><SingleLineEnd>
+type Foo4 -> func Bar -> a = b<ExpressionBodyEnd><ExpressionBodyEnd>
 
 ###
 
@@ -44,7 +44,7 @@ type Foo5
 	func Bar -> a = b
 ===
 type Foo5
-	<Indent>func Bar -> a = b<SingleLineEnd><Dedent>
+	<Indent>func Bar -> a = b<ExpressionBodyEnd><Dedent>
 
 ###
 
@@ -53,8 +53,8 @@ type Foo6
 	func Baz -> c = d
 ===
 type Foo6
-	<Indent>func Bar -> a = b<SingleLineEnd>
-	func Baz -> c = d<SingleLineEnd><Dedent>
+	<Indent>func Bar -> a = b<ExpressionBodyEnd>
+	func Baz -> c = d<ExpressionBodyEnd><Dedent>
 
 ###
 
@@ -62,7 +62,7 @@ type Foo7 -> func Bar
 	a = b
 ===
 type Foo7 -> func Bar
-	<Indent>a = b<Dedent><SingleLineEnd>
+	<Indent>a = b<Dedent><ExpressionBodyEnd>
 
 ###
 
@@ -70,7 +70,7 @@ namespace Foo8 -> type Foo
 	func Bar -> a = b
 ===
 namespace Foo8 -> type Foo
-	<Indent>func Bar -> a = b<SingleLineEnd><Dedent><SingleLineEnd>
+	<Indent>func Bar -> a = b<ExpressionBodyEnd><Dedent><ExpressionBodyEnd>
 
 ###
 
@@ -95,5 +95,33 @@ namespace Foo10 {
 ===
 namespace Foo10 {
 
-		type Bar -> func Baz {}<SingleLineEnd>
+		type Bar -> func Baz {}<ExpressionBodyEnd>
+}
+
+###
+
+namespace Foo11 {
+
+		type Bar -> type Baz
+			type Woo {}
+}
+===
+namespace Foo11 {
+
+		type Bar -> type Baz<ExpressionBodyEnd>
+			<Indent>type Woo {}<Dedent>
+}
+
+###
+
+{
+		type Foo12
+			func Bar
+				a = b
+}
+===
+{
+		type Foo12
+			<Indent>func Bar
+				<Indent>a = b<Dedent><Dedent>
 }

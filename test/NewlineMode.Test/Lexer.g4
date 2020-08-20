@@ -4,7 +4,7 @@ options {
 	superClass = NewlineModeLexerBase;
 }
 
-tokens { Indent, Dedent, SingleLineEnd }
+tokens { Indent, Dedent, ExpressionBodyEnd }
 
 @header {
 	#pragma warning disable 3021
@@ -13,7 +13,7 @@ tokens { Indent, Dedent, SingleLineEnd }
 
 @lexer::members {
 	protected override SpecialTokenTypes Tokens { get; } =
-		new SpecialTokenTypes(Newline, (Tab, Indent, Dedent), (Arrow, SingleLineEnd), (LeftBrace, RightBrace));
+		new SpecialTokenTypes(Newline, (Tab, Indent, Dedent), (Arrow, ExpressionBodyEnd), (LeftBrace, RightBrace));
 }
 
 Identifier: [A-Z];

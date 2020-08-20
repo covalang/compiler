@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,13 @@ namespace Cova
 	{
 		static void Main()
 		{
-			using var fileStream = File.OpenRead("Main2.cova");
+			using var fileStream = File.OpenRead("../../../Main3.cova");
 			var inputStream = new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
-			Console.WriteLine(String.Join("|", lexer.GetAllTokens().Select(x => x.Text)));
-			lexer.Reset();
-			return;
+			//Console.WriteLine(String.Join("|", lexer.GetAllTokens().Select(x => x.Text)));
+			//lexer.Reset();
+			//return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);
@@ -32,7 +33,17 @@ namespace Cova
 
 	class CovaListener : CovaParserBaseListener
 	{
-		
+		public override void EnterLocalDefinition([NotNull] CovaParser.LocalDefinitionContext context)
+		{
+		}
+
+		public override void EnterSequenceExpression([NotNull] CovaParser.SequenceExpressionContext context)
+		{
+			var expressions = context.expression();
+			var lower = expressions[0];
+			var upper = expressions[1];
+			var interval = expressions[3];
+		}
 	}
 
 	class Raii : IDisposable
@@ -93,7 +104,12 @@ namespace Cova
 	}
 	class Function : Definition
 	{
-		public Function(String name, Type parent) : base(name, parent) {}
+		public Function(String name, Type parent) : base(name, parent) { }
+		public Dictionary<String, Statement> Statements { get; } = new Dictionary<String, Statement>();
+	}
+	class Statement : Definition
+	{
+		public Statement(String name, Definition? parent) : base(name, parent) { }
 	}
 
 	// class CovaParserVisitor : CovaParserBaseVisitor<Int32>
@@ -125,7 +141,7 @@ namespace Cova
 	// 		TypeNames.Add(String.Join('.', nameQualifiers) + '.' + context.Identifier().GetText());
 	// 		return base.VisitTypeDeclaration(context);
 	// 	}
-		
+
 	// 	public override Int32 VisitFunctionDeclaration(CovaParser.FunctionDeclarationContext context)
 	// 	{
 	// 		return base.VisitFunctionDeclaration(context);

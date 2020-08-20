@@ -31,4 +31,5 @@ msbuild.wrn
 .vs/
 
 AntlrOutput/
-.antlr/
+**/.antlr
+.idea
