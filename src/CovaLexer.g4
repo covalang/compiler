@@ -32,6 +32,10 @@ Prop: 'prop';
 Func: 'func';
 Local: 'local';
 
+For: 'for';
+Map: 'map';
+Fold: 'fold';
+
 // Storage types
 
 StaticStorageType : '$';

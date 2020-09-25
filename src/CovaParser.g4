@@ -31,7 +31,7 @@ namespaceMemberDefinition
 	;
 
 namespaceDefinition
-	: Namespace Whitespace+ qualifiedIdentifier namespaceBody?
+	: Namespace Whitespace+ visibilityModifier Whitespace+ qualifiedIdentifier namespaceBody?
 	;
 
 namespaceBody
@@ -41,7 +41,7 @@ namespaceBody
 	;
 
 typeDefinition
-	: Type (Whitespace+ typeKind)? Whitespace+ visibility? identifier typeBody?
+	: Type (Whitespace+ typeKind)? Whitespace+ visibilityModifier identifier typeBody?
 	;
 
 typeBody
@@ -58,18 +58,20 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ visibility? storageType? identifier Whitespace+ qualifiedIdentifier
+	: Field Whitespace+ visibilityModifier Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType
 	;
 
 propertyDefinition
-	: Prop Whitespace+ visibility? storageType? identifier Whitespace+ qualifiedIdentifier
+	: Prop Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType
 	;
 
 functionDefinition
-	: visibility? Func Whitespace+ identifier (LeftParenthesis parameters RightParenthesis)? body?
+	: Func Whitespace+ visibilityModifier Whitespace+ identifier (LeftParenthesis parameters RightParenthesis)? memberType? body?
 	;
 	parameters: parameter (Comma parameter)*;
 	parameter: identifier Whitespace+ qualifiedIdentifier;
+
+memberType: qualifiedIdentifier;
 
 body
 	: blockStart (blockContinue | statement)* blockEnd
@@ -85,11 +87,17 @@ identifier
 	: Identifier
 	;
 
+visibilityModifier: readVisibility writeVisibility?;
+
+readVisibility: visibility;
+writeVisibility: visibility;
+
 visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
-	publicVisibility : Plus;
-	privateVisibility : Minus;
-	protectedVisibility : Octothorp;
-	internalVisibility : Tilde;
+
+publicVisibility : Plus;
+privateVisibility : Minus;
+protectedVisibility : Octothorp;
+internalVisibility : Tilde;
 
 storageType : staticStorageType;// | instanceStorageType;
 	staticStorageType : StaticStorageType;
@@ -100,7 +108,7 @@ typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | d
 	structTypeKind : Struct;
 	interfaceTypeKind : Interface;
 	traitTypeKind : Trait;
-	delegateTypeKind : Func Whitespace+ Type;
+	delegateTypeKind : Func;
 
 statement
 	: assignment
@@ -173,7 +181,7 @@ bitwiseNotOperator: Tilde;
 
 arithmeticOperator
 	: additionOperator
-	| Whitespace+ subtractionOperator Whitespace+
+	| Whitespace subtractionOperator Whitespace
 	| multiplicationOperator
 	| divisionOperator
 	| moduloOperator
@@ -229,6 +237,10 @@ closedRangeOperator: Dot Dot Dot;
 
 sequenceOperator: Colon;
 
+forOperator: For;
+mapOperator: Map;
+foldOperator: Fold;
+
 unaryOperator
 	: notOperator
 	| bitwiseNotOperator
@@ -245,6 +257,9 @@ binaryOperator
 	| rangeRelationalOperator
 	| rangeOperator
 	| sequenceOperator
+	| forOperator
+	| mapOperator
+	| foldOperator
 	;
 
 expression
