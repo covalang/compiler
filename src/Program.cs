@@ -14,11 +14,15 @@ namespace Cova
 	{
 		static void Main()
 		{
-			using var fileStream = File.OpenRead("../../../Main3.cova");
+			var filename = "Main3.cova";
+			var filPath = File.Exists(filename) ? filename : "../../../" + filename;
+			using var fileStream = File.OpenRead(filPath);
 			var inputStream = new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
-			//Console.WriteLine(String.Join("|", lexer.GetAllTokens().Select(x => x.Text)));
+			//IToken token;
+			//while ((token = lexer.NextToken()).Type != Lexer.Eof)
+			//	Console.Write(token.Text);
 			//lexer.Reset();
 			//return;
 
@@ -33,17 +37,17 @@ namespace Cova
 
 	class CovaListener : CovaParserBaseListener
 	{
-		public override void EnterLocalDefinition([NotNull] CovaParser.LocalDefinitionContext context)
-		{
-		}
+		//public override void EnterLocalDefinition([NotNull] CovaParser.LocalDefinitionContext context)
+		//{
+		//}
 
-		public override void EnterSequenceExpression([NotNull] CovaParser.SequenceExpressionContext context)
-		{
-			var expressions = context.expression();
-			var lower = expressions[0];
-			var upper = expressions[1];
-			var interval = expressions[3];
-		}
+		//public override void EnterSequenceExpression([NotNull] CovaParser.SequenceExpressionContext context)
+		//{
+		//	var expressions = context.expression();
+		//	var lower = expressions[0];
+		//	var upper = expressions[1];
+		//	var interval = expressions[3];
+		//}
 	}
 
 	class Raii : IDisposable
