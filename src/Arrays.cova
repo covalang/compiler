@@ -45,28 +45,28 @@ type Baz is Foo
 
 
 qual System
-	+type ForwardIterable<T> trait
-		+func getIterator() ForwardIterator<T>
+	type + ForwardIterable<T> trait
+		func + getIterator() ForwardIterator<T>
 
-	+type BackwardIterable<T> trait
-		+func getIterator() BackwardIterator<T>
+	type + BackwardIterable<T> trait
+		func + getIterator() BackwardIterator<T>
 
-	+type ForwardIterator<T> trait
-		+func current T
-		+func next() Boolean
+	type + ForwardIterator<T> trait
+		func + current T
+		func + next() Boolean
 
-	+type BackwardIterator<T> trait
-		+func current T
-		+func next() Boolean
+	type + BackwardIterator<T> trait
+		func + current T
+		func + next() Boolean
 
-	+type Iterator<T> trait is ForwardIterator<T> & BackwardIterator<T>
+	type + Iterator<T> trait is ForwardIterator<T> & BackwardIterator<T>
 
-	+type Range<T> trait
+	type + Range<T> trait
 
 qual System
-	+type+ Vector<T>
-		+field- count @ Size
-		-field data * Array<T>
+	type ++ Vector<T>
+		field +- count @ Size
+		field + data * Array<T>
 
 		+init
 			count = 0
@@ -75,11 +75,11 @@ qual System
 		fini
 			// do nothing?
 
-		+prop+ this[index @ Size]
+		prop ++ this[index @ Size]
 			get => data[index]
 			set => data[index] = value
 
-		+prop this[index @ Size] => data[index]
+		prop + this[index @ Size] => data[index]
 
 		+prop this[index @ Size]
 			data[index]
