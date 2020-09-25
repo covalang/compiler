@@ -37,6 +37,33 @@ namespace Cova
 
 	class CovaListener : CovaParserBaseListener
 	{
+		private readonly List<ParserRuleContext> qualifierStack = new List<ParserRuleContext>();
+		private String CurrentQualifier => String.Join('.', qualifierStack.SelectMany(x => x is CovaParser.QualifiedIdentifierContext qic ? qic.identifier() : x is CovaParser.IdentifierContext ic ? new[] { ic } : throw new InvalidOperationException()).Select(x => x.GetText()));
+		
+		public override void EnterNamespaceDefinition([NotNull] CovaParser.NamespaceDefinitionContext context)
+		{
+			qualifierStack.Add(context.qualifiedIdentifier());
+			Console.WriteLine(CurrentQualifier);
+		}
+		
+		public override void ExitNamespaceDefinition([NotNull] CovaParser.NamespaceDefinitionContext context)
+		{
+			qualifierStack.RemoveAt(qualifierStack.Count - 1);
+		}
+		
+		public override void EnterTypeDefinition([NotNull] CovaParser.TypeDefinitionContext context)
+		{
+			qualifierStack.Add(context.identifier());
+			Console.WriteLine(CurrentQualifier);
+
+
+		}
+		
+		public override void ExitTypeDefinition([NotNull] CovaParser.TypeDefinitionContext context)
+		{
+			qualifierStack.RemoveAt(qualifierStack.Count - 1);
+		}
+		
 		//public override void EnterLocalDefinition([NotNull] CovaParser.LocalDefinitionContext context)
 		//{
 		//}
