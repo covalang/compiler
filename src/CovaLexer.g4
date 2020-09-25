@@ -1,9 +1,5 @@
 lexer grammar CovaLexer;
 
-options {
-	superClass = NewlineModeLexerBase;
-}
-
 tokens { Indent, Dedent, SingleLineEnd }
 
 @header {
@@ -14,7 +10,8 @@ tokens { Indent, Dedent, SingleLineEnd }
 }
 
 @lexer::members {
-	protected override SpecialTokenTypes GetTokenTypes() => (Newline, (Tab, Indent, Dedent), (Arrow, SingleLineEnd), (LeftBrace, RightBrace));
+	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, Indent, Dedent);
+	public override IToken NextToken() => dentHelper.NextTokenWithIndentation(base.NextToken);
 }
 
 // Keywords
@@ -28,7 +25,7 @@ Class: 'class';
 Struct: 'struct';
 Interface: 'interface';
 Trait: 'trait';
-Delegate: 'delegate';
+//Delegate: 'delegate'; NOTE: use 'type func' to define a Function Type https://en.wikipedia.org/wiki/Function_type
 
 Field: 'field';
 Prop: 'prop';
@@ -40,26 +37,25 @@ Local: 'local';
 StaticStorageType : '$';
 //InstanceStorageType : '|';
 
-// Keywords/tokens
-
 //Boolean
 
 True: 'true';
 False: 'false';
 BooleanLiteral: True | False;
 
-And: 'and' | '∧' | '/\\';
-Or: 'or' | '∨' | '\\/';
+And: 'and' | '∧';
+Or: 'or' | '∨';
 Not: 'not' | '¬';
+
+// Equality
 
 Equal: '==';
 NotEqual: '!=';
-Within: '><';
-Without: '<>';
-LessThanOrEqual: '<=' | '≤';
-LessThan: '<';
-GreaterThanOrEqual: '>=' | '≥';
-GreaterThan: '>';
+
+// Relational
+
+LessThanOrEqual: '≤';
+GreaterThanOrEqual: '≥';
 
 Is: 'is';
 Isnt: 'isnt';
@@ -68,39 +64,32 @@ Isnt: 'isnt';
 
 Ampersand: '&';
 VerticalBar: '|';
+Exclamation: '!';
 Caret: '^';
 
-TripleLeftChevron: '<<<';
-DoubleLeftChevron: '<<';
-// LeftChevron: '<';
+LeftChevron: '<';
+RightChevron: '>';
 
-TripleRightChevron: '>>>';
-DoubleRightChevron: '>>';
-// RightChevron: '>';
-
-PlusMinus: '±' | '+-';
+PlusMinus: '±';
 Plus: '+';
 Minus: '-';
-Multiply: '*';
-Divide: '/';
-Modulo: '%';
-Power: '**';
-Root: '//' | '√';
+Asterisk: '*';
+Slash: '/';
+Backslash: '\\';
+Percent: '%';
+Root: '√';
 Octothorp: '#';
 Tilde: '~';
 
 
-TripleDot: '...';
-DoubleDot: '..';
 Dot: '.';
 
-EqualsSign: '=';
+Equals: '=';
 
 LeftParenthesis: '(';
 RightParenthesis: ')';
 LeftBracket: '[';
 RightBracket: ']';
-DoubleColon: '::';
 Colon: ':';
 SemiColon: ';';
 Comma: ',';
@@ -125,7 +114,7 @@ Intersection: '∩';
 // Lexical rules
 
 Identifier
-	: [_A-Za-z][_A-Za-z0-9]*
+	: [_A-Za-z][_A-Za-z0-9-]*
 	//: IdentifierStartCharacter IdentifierPartCharacter*
 	;
 
@@ -147,11 +136,11 @@ StringLiteral: '"' (EscapedCharacter | ~'"') '"';
 CharacterLiteral: '\'' (EscapedCharacter | ~'\'') '\'';
 
 fragment EscapedCharacter
-    : '\\' [0\\tnr"']
-    | '\\x' HexadecimalDigit HexadecimalDigit
-    | '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
-    | '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
-    ;
+	: '\\' [0\\tnr"']
+	| '\\x' HexadecimalDigit HexadecimalDigit
+	| '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
+	| '\\u' '{' HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit HexadecimalDigit '}'
+	;
 
 Arrow: '->';
 FatArrow: '=>';
