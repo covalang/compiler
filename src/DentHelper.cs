@@ -1,17 +1,20 @@
-using System;
+﻿using System;
 using Antlr4.Runtime;
 
 public sealed class DentHelper
 {
 	private readonly Int32 newlineToken;
 	private readonly Int32 indentationToken;
-	private readonly Int32 indentToken;
-	private readonly Int32 dedentToken;
-	public DentHelper(Int32 newlineToken, Int32 indentationToken, Int32 indentToken, Int32 dedentToken)
+	private readonly (Int32 tokenType, String name) indentToken;
+	private readonly (Int32 tokenType, String name) dentToken;
+	private readonly (Int32 tokenType, String name) dedentToken;
+
+	public DentHelper(Int32 newlineToken, Int32 indentationToken, (Int32 tokenType, String name) indentToken, (Int32 tokenType, String name) dentToken, (Int32 tokenType, String name) dedentToken)
 	{
 		this.newlineToken = newlineToken;
 		this.indentationToken = indentationToken;
 		this.indentToken = indentToken;
+		this.dentToken = dentToken;
 		this.dedentToken = dedentToken;
 	}
 
@@ -19,11 +22,15 @@ public sealed class DentHelper
 	private Boolean anyNewlineSinceLastNonTab;
 	private UInt32 tabCount;
 	private IToken? currentToken;
+	private Boolean done;
 
-	public IToken NextTokenWithIndentation(Func<IToken> baseNextToken)
+	public IToken NextToken(Func<IToken> baseNextToken)
 	{
 		if (currentToken == null)
+		{
 			currentToken = baseNextToken();
+			return CreateToken(indentToken.tokenType, indentToken.name);
+		}
 
 		if (currentToken.Type == newlineToken)
 			anyNewlineSinceLastNonTab = true;
@@ -36,21 +43,23 @@ public sealed class DentHelper
 		{
 			if (tabCount != currentDentLevel)
 				return GetDentToken();
+			if (!done)
+			{
+				done = true;
+				return CreateToken(dedentToken.tokenType, dedentToken.name);
+			}
 		}
 		else
 		{
 			if (anyNewlineSinceLastNonTab)
 			{
-				if (tabCount != 0)
+				var dentToken = GetDentToken();
+				if (tabCount == currentDentLevel)
 				{
-					if (tabCount != currentDentLevel)
-						return GetDentToken();
-					else
-					{
-						anyNewlineSinceLastNonTab = false;
-						tabCount = 0;
-					}
+					anyNewlineSinceLastNonTab = false;
+					tabCount = 0;
 				}
+				return dentToken;
 			}
 		}
 
@@ -63,20 +72,20 @@ public sealed class DentHelper
 	{
 		if (tabCount > currentDentLevel) {
 			++currentDentLevel;
-			return CreateToken(indentToken, "Indent");
+			return CreateToken(indentToken.tokenType, indentToken.name);
 		}
 		else if (tabCount < currentDentLevel) {
 			--currentDentLevel;
-			return CreateToken(dedentToken, "Dedent");
+			return CreateToken(dedentToken.tokenType, dedentToken.name);
 		}
 		else
-			throw new InvalidOperationException($"The value of `{nameof(tabCount)}` cannot be equal to `{nameof(currentDentLevel)}` here.");
+			return CreateToken(dentToken.tokenType, dentToken.name);
 	}
 
 	private CommonToken CreateToken(Int32 type, String name) =>
-		new CommonToken(type, "<" + name + ">")
+		new CommonToken(type, name)
 		{
-			Line = currentToken.Line,
+			Line = currentToken!.Line,
 			Column = currentToken.Column,
 			StartIndex = currentToken.StopIndex,
 			StopIndex = currentToken.StopIndex

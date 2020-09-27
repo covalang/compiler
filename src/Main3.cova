@@ -1,9 +1,22 @@
-﻿namespace Foo
+﻿namespace Fee
+namespace Fii
+namespace Foo
 	type Bar
 		func Baz
 			local a = [1.22 .. 2.34 : 0.01]
 			local b = [a..b:c]
 			local nums = [0...4]
-			local evenNums = nums : 2
-			for evenNums 
+			local even-nums = nums : 2
 			x = 1 / 3
+			local root-of-9 = \/9
+
+		func Woo -> 3
+
+		func Woo -> [x -> x, x -> x + 1]
+		func Woo -> local del = (x -> x.to-string())
+
+	type Bananagrams
+		func main
+
+namespace Foo8 -> type Foo
+	func Bar -> a = b

@@ -2,9 +2,9 @@
 	func Bar
 		a = b
 ===
-type Foo1
-	<Indent>func Bar
-		<Indent>a = b<Dedent><Dedent>
+►type Foo1
+	►func Bar
+		►a = b◄◄◄
 
 ###
 
@@ -13,10 +13,10 @@ type Foo2
 		a = b
 		c = d
 ===
-type Foo2
-	<Indent>func Bar
-		<Indent>a = b
-		c = d<Dedent><Dedent>
+►type Foo2
+	►func Bar
+		►a = b
+		■c = d◄◄◄
 
 ###
 
@@ -26,25 +26,25 @@ type Foo3
 	func Baz
 		c = d
 ===
-type Foo3
-	<Indent>func Bar
-		<Indent>a = b
-	<Dedent>func Baz
-		<Indent>c = d<Dedent><Dedent>
+►type Foo3
+	►func Bar
+		►a = b
+	◄func Baz
+		►c = d◄◄◄
 
 ###
 
 type Foo4 -> func Bar -> a = b
 ===
-type Foo4 -> func Bar -> a = b<ExpressionBodyEnd><ExpressionBodyEnd>
+►type Foo4 -> func Bar -> a = b♦♦◄
 
 ###
 
 type Foo5
 	func Bar -> a = b
 ===
-type Foo5
-	<Indent>func Bar -> a = b<ExpressionBodyEnd><Dedent>
+►type Foo5
+	►func Bar -> a = b♦◄◄
 
 ###
 
@@ -52,76 +52,22 @@ type Foo6
 	func Bar -> a = b
 	func Baz -> c = d
 ===
-type Foo6
-	<Indent>func Bar -> a = b<ExpressionBodyEnd>
-	func Baz -> c = d<ExpressionBodyEnd><Dedent>
+►type Foo6
+	►func Bar -> a = b
+	♦■func Baz -> c = d♦◄◄
 
 ###
 
 type Foo7 -> func Bar
 	a = b
 ===
-type Foo7 -> func Bar
-	<Indent>a = b<Dedent><ExpressionBodyEnd>
+►type Foo7 -> func Bar
+	►a = b◄♦◄
 
 ###
 
 namespace Foo8 -> type Foo
 	func Bar -> a = b
 ===
-namespace Foo8 -> type Foo
-	<Indent>func Bar -> a = b<ExpressionBodyEnd><Dedent><ExpressionBodyEnd>
-
-###
-
-namespace Foo9 {
-type Bar {
-func Baz {
-}
-}}
-===
-namespace Foo9 {
-type Bar {
-func Baz {
-}
-}}
-
-###
-
-namespace Foo10 {
-
-		type Bar -> func Baz {}
-}
-===
-namespace Foo10 {
-
-		type Bar -> func Baz {}<ExpressionBodyEnd>
-}
-
-###
-
-namespace Foo11 {
-
-		type Bar -> type Baz
-			type Woo {}
-}
-===
-namespace Foo11 {
-
-		type Bar -> type Baz<ExpressionBodyEnd>
-			<Indent>type Woo {}<Dedent>
-}
-
-###
-
-{
-		type Foo12
-			func Bar
-				a = b
-}
-===
-{
-		type Foo12
-			<Indent>func Bar
-				<Indent>a = b<Dedent><Dedent>
-}
+►namespace Foo8 -> type Foo
+	►func Bar -> a = b♦◄♦◄

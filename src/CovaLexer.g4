@@ -1,6 +1,6 @@
 lexer grammar CovaLexer;
 
-tokens { Indent, Dedent, SingleLineEnd }
+tokens { Indent, Dent, Dedent, LinearBodyEnd }
 
 @header {
 	#pragma warning disable 3021
@@ -10,8 +10,15 @@ tokens { Indent, Dedent, SingleLineEnd }
 }
 
 @lexer::members {
-	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, Indent, Dedent);
-	public override IToken NextToken() => dentHelper.NextTokenWithIndentation(base.NextToken);
+	//private readonly CovaLexerHelper = new CovaLexerHelper(Newline, Tab, )
+	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, (Indent, "►"), (Dent, "■"), (Dedent, "◄"));
+	private readonly LinearHelper linearHelper = new LinearHelper(Arrow, (LinearBodyEnd, "♦"),
+		(Indent, Dedent, new [] { Dent, Comma }),
+		(LeftParenthesis, RightParenthesis, new [] { Comma }),
+		(LeftBracket, RightBracket, new [] { Comma }),
+		(LeftBrace, RightBrace, new [] { SemiColon })
+	);
+	public override IToken NextToken() => linearHelper.NextToken(() => dentHelper.NextToken(base.NextToken));
 }
 
 // Keywords
@@ -45,7 +52,6 @@ StaticStorageType : '$';
 
 True: 'true';
 False: 'false';
-BooleanLiteral: True | False;
 
 And: 'and' | '∧';
 Or: 'or' | '∨';

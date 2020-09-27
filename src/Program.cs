@@ -20,11 +20,11 @@ namespace Cova
 			var inputStream = new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
-			//IToken token;
-			//while ((token = lexer.NextToken()).Type != Lexer.Eof)
-			//	Console.Write(token.Text);
-			//lexer.Reset();
-			//return;
+			IToken token;
+			while ((token = lexer.NextToken()).Type != Lexer.Eof)
+				Console.Write(token.Text);
+			lexer.Reset();
+			return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);

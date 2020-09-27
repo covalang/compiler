@@ -8,20 +8,19 @@ options {
 	#pragma warning disable 3021
 }
 
-file: (Newline | namespaceMemberDefinition)* EOF;
+file: (namespaceMemberDefinition | Newline)* EOF;
 
-//block: blockStart statement (blockContinue statement)* blockEnd;
+dentedBodyBegin: Newline Tab* Indent;
+dentedBodyContinue: Newline Tab+ Dent | Comma;
+dentedBodyEnd: Dedent;
 
-blockStart: Newline Tab* Indent;
-blockContinue: Newline Tab* | Comma;
-blockEnd: Dedent;
+linearBodyBegin: Whitespace+ Arrow;
+linearBodyContinue: Whitespace+ Comma;
+linearBodyEnd: anyWhitespace? LinearBodyEnd;
 
-singleLineStart: anyWhitespace? Arrow;
-singleLineEnd: anyWhitespace? SingleLineEnd;
-
-braceBlockStart: anyWhitespace? LeftBrace;
-braceBlockContinue: anyWhitespace? SemiColon;
-braceBlockEnd: anyWhitespace? LeftBrace;
+bracedBodyBegin: anyWhitespace? LeftBrace;
+bracedBodyContinue: anyWhitespace? SemiColon;
+bracedBodyEnd: anyWhitespace? LeftBrace;
 
 anyWhitespace: (Newline | Tab | Whitespace)+;
 
@@ -35,9 +34,9 @@ namespaceDefinition
 	;
 
 namespaceBody
-	: blockStart (blockContinue | namespaceMemberDefinition)* blockEnd
-	| braceBlockStart (braceBlockContinue | namespaceMemberDefinition)* braceBlockEnd
-	| singleLineStart namespaceMemberDefinition singleLineEnd
+	: dentedBodyBegin (namespaceMemberDefinition | dentedBodyContinue)* dentedBodyEnd
+	| bracedBodyBegin (namespaceMemberDefinition | bracedBodyContinue)* bracedBodyEnd
+	| linearBodyBegin (namespaceMemberDefinition | linearBodyContinue)* linearBodyEnd
 	;
 
 typeDefinition
@@ -45,9 +44,9 @@ typeDefinition
 	;
 
 typeBody
-	: blockStart (blockContinue | typeMemberDefinition)* blockEnd
-	| braceBlockStart (braceBlockContinue | typeMemberDefinition)* braceBlockEnd
-	| singleLineStart typeMemberDefinition singleLineEnd
+	: dentedBodyBegin (typeMemberDefinition | dentedBodyContinue)* dentedBodyEnd
+	| bracedBodyBegin (typeMemberDefinition | bracedBodyContinue)* bracedBodyEnd
+	| linearBodyBegin (typeMemberDefinition | linearBodyContinue)* linearBodyEnd
 	;
 
 typeMemberDefinition
@@ -68,15 +67,16 @@ propertyDefinition
 functionDefinition
 	: Func Whitespace+ visibilityModifier Whitespace+ identifier (LeftParenthesis parameters RightParenthesis)? memberType? body?
 	;
-	parameters: parameter (Comma parameter)*;
-	parameter: identifier Whitespace+ qualifiedIdentifier;
+
+parameters: parameter (Comma parameter)*;
+parameter: identifier Whitespace+ qualifiedIdentifier;
 
 memberType: qualifiedIdentifier;
 
 body
-	: blockStart (blockContinue | statement)* blockEnd
-	| braceBlockStart (braceBlockContinue | statement)* braceBlockEnd
-	| singleLineStart statement singleLineEnd
+	: dentedBodyBegin (statement | dentedBodyContinue)* dentedBodyEnd
+	| bracedBodyBegin (statement | bracedBodyContinue)* bracedBodyEnd
+	| linearBodyBegin (statement | linearBodyContinue)* linearBodyEnd
 	;
 
 qualifiedIdentifier
@@ -87,6 +87,7 @@ identifier
 	: Identifier
 	;
 
+
 visibilityModifier: readVisibility writeVisibility?;
 
 readVisibility: visibility;
@@ -94,21 +95,24 @@ writeVisibility: visibility;
 
 visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
 
-publicVisibility : Plus;
-privateVisibility : Minus;
-protectedVisibility : Octothorp;
-internalVisibility : Tilde;
+publicVisibility: Plus;
+privateVisibility: Minus;
+protectedVisibility: Octothorp;
+internalVisibility: Tilde;
+
 
 storageType : staticStorageType;// | instanceStorageType;
 	staticStorageType : StaticStorageType;
 	//instanceStorageType : InstanceStorageType;
 
+
 typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
-	enumTypeKind : Enum;
-	structTypeKind : Struct;
-	interfaceTypeKind : Interface;
-	traitTypeKind : Trait;
-	delegateTypeKind : Func;
+
+enumTypeKind: Enum;
+structTypeKind: Struct;
+interfaceTypeKind: Interface;
+traitTypeKind: Trait;
+delegateTypeKind: Func;
 
 statement
 	: assignment
