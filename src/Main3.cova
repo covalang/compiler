@@ -12,7 +12,7 @@ namespace Foo
 
 		func Woo -> 3
 
-		func Woo -> [x -> x, x -> x + 1]
+		func Woo { local del = x -> x.to-string(); [x -> x, x -> x + 1] }
 		func Woo -> local del = (x -> x.to-string())
 
 	type Bananagrams

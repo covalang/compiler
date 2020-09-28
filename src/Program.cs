@@ -15,16 +15,41 @@ namespace Cova
 		static void Main()
 		{
 			var filename = "Main3.cova";
-			var filPath = File.Exists(filename) ? filename : "../../../" + filename;
-			using var fileStream = File.OpenRead(filPath);
+			var filePath = File.Exists(filename) ? filename : "../../../" + filename;
+			using var fileStream = File.OpenRead(filePath);
 			var inputStream = new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
-			IToken token;
-			while ((token = lexer.NextToken()).Type != Lexer.Eof)
-				Console.Write(token.Text);
-			lexer.Reset();
-			return;
+			// IToken token;
+			// Int32 indents = -1;
+			// UInt32 line = 1;
+			// //Console.Write($"{line,-3}");
+			// while ((token = lexer.NextToken()).Type != Lexer.Eof)
+			// {
+			// 	Console.Write(token.Text);
+			// 	// var tokenTypeName = lexer.GetTokenTypeName(token);
+			// 	// if (tokenTypeName == "Newline")
+			// 	// {
+			// 	// 	Console.WriteLine();
+			// 	// 	Console.Write($"{++line,-3}");
+			// 	// }
+			// 	// else if (tokenTypeName == "Indent")
+			// 	// {
+			// 	// 	indents++;
+			// 	// 	Console.Write(new String('\t', indents));
+			// 	// }
+			// 	// else if (tokenTypeName == "Dedent")
+			// 	// {
+			// 	// 	indents--;
+			// 	// 	Console.Write(new String('\t', indents));
+			// 	// }
+			// 	// else if (tokenTypeName == "Dent" | tokenTypeName == "Tab")
+			// 	// {}
+			// 	// else
+			// 	// 	Console.Write(tokenTypeName + " ");
+			// }
+			// lexer.Reset();
+			// return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);

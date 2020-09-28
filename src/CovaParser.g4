@@ -8,21 +8,27 @@ options {
 	#pragma warning disable 3021
 }
 
-file: (namespaceMemberDefinition | Newline)* EOF;
+file: (namespaceBody | Newline)* EOF;
 
-dentedBodyBegin: Newline Tab* Indent;
-dentedBodyContinue: Newline Tab+ Dent | Comma;
-dentedBodyEnd: Dedent;
 
-linearBodyBegin: Whitespace+ Arrow;
+dentedBodyBegin: dentedIgnorable* Indent;
+dentedBodyContinue: dentedIgnorable* (Dent | SemiColon);
+dentedBodyEnd: dentedIgnorable* Dedent;
+
+dentedIgnorable: Newline | Tab;
+
+
+linearBodyBegin: Whitespace+ Arrow Whitespace+;
 linearBodyContinue: Whitespace+ Comma;
 linearBodyEnd: anyWhitespace? LinearBodyEnd;
 
-bracedBodyBegin: anyWhitespace? LeftBrace;
-bracedBodyContinue: anyWhitespace? SemiColon;
-bracedBodyEnd: anyWhitespace? LeftBrace;
+
+bracedBodyBegin: anyWhitespace? LeftBrace anyWhitespace?;
+bracedBodyContinue: anyWhitespace? SemiColon anyWhitespace?;
+bracedBodyEnd: anyWhitespace? RightBrace;
 
 anyWhitespace: (Newline | Tab | Whitespace)+;
+
 
 namespaceMemberDefinition
 	: namespaceDefinition
@@ -30,7 +36,7 @@ namespaceMemberDefinition
 	;
 
 namespaceDefinition
-	: Namespace Whitespace+ visibilityModifier Whitespace+ qualifiedIdentifier namespaceBody?
+	: Namespace Whitespace+ qualifiedIdentifier (Whitespace+ visibilityModifier)? namespaceBody?
 	;
 
 namespaceBody
@@ -40,7 +46,7 @@ namespaceBody
 	;
 
 typeDefinition
-	: Type (Whitespace+ typeKind)? Whitespace+ visibilityModifier identifier typeBody?
+	: Type Whitespace+ (typeKind Whitespace+)? identifier (Whitespace+ visibilityModifier)? typeBody?
 	;
 
 typeBody
@@ -57,7 +63,7 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ visibilityModifier Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType
+	: Field Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType (Whitespace+ visibilityModifier)?
 	;
 
 propertyDefinition
@@ -65,11 +71,11 @@ propertyDefinition
 	;
 
 functionDefinition
-	: Func Whitespace+ visibilityModifier Whitespace+ identifier (LeftParenthesis parameters RightParenthesis)? memberType? body?
+	: Func Whitespace+ identifier parameters? memberType? (Whitespace+ visibilityModifier)? body?
 	;
 
-parameters: parameter (Comma parameter)*;
-parameter: identifier Whitespace+ qualifiedIdentifier;
+parameters: LeftParenthesis parameter (Comma parameter)* RightParenthesis;
+parameter: identifier (Whitespace+ qualifiedIdentifier)?;
 
 memberType: qualifiedIdentifier;
 
@@ -267,8 +273,9 @@ binaryOperator
 	;
 
 expression
-	: LeftParenthesis Whitespace* expression Whitespace* RightParenthesis                                  #parenthesisExpression
-	| LeftBracket Whitespace* expression Whitespace* RightBracket                                          #bracketExpression
+	: LeftParenthesis Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightParenthesis                                  #parenthesisExpression
+	| LeftBracket Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightBracket                                          #bracketExpression
+	| (parameter | parameters) body                                                                        #closureExpression
 	| unaryOperator expression                                                                             #unaryExpression
 	| expression Whitespace* binaryOperator Whitespace* expression                                         #binaryExpression
 	// | expression Whitespace+ arithmeticOperator Whitespace+ expression                                     #arithmeticExpression
