@@ -1,21 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Antlr4.Runtime;
 
 public sealed class DentHelper
 {
 	private readonly Int32 newlineToken;
 	private readonly Int32 indentationToken;
-	private readonly (Int32 tokenType, String name) indentToken;
-	private readonly (Int32 tokenType, String name) dentToken;
-	private readonly (Int32 tokenType, String name) dedentToken;
+	private readonly (Int32 tokenType, String displayText) indentToken;
+	private readonly (Int32 tokenType, String displayText) dentToken;
+	private readonly (Int32 tokenType, String displayText) dedentToken;
+	private readonly ImmutableDictionary<Int32, Int32> otherBlockTerminals;
 
-	public DentHelper(Int32 newlineToken, Int32 indentationToken, (Int32 tokenType, String name) indentToken, (Int32 tokenType, String name) dentToken, (Int32 tokenType, String name) dedentToken)
+	public DentHelper(
+		Int32 newlineToken,
+		Int32 indentationToken,
+		(Int32 tokenType, String displayText) indentToken,
+		(Int32 tokenType, String displayText) dentToken,
+		(Int32 tokenType, String displayText) dedentToken,
+		params (Int32 begin, Int32 end)[] otherBlockTerminals
+	)
 	{
 		this.newlineToken = newlineToken;
 		this.indentationToken = indentationToken;
 		this.indentToken = indentToken;
 		this.dentToken = dentToken;
 		this.dedentToken = dedentToken;
+		this.otherBlockTerminals = otherBlockTerminals.ToImmutableDictionary(x => x.begin, x => x.end);
+		this.otherBlockEnds = new Stack<Int32>(32);
 	}
 
 	private UInt32 currentDentLevel;
@@ -23,43 +35,56 @@ public sealed class DentHelper
 	private UInt32 tabCount;
 	private IToken? currentToken;
 	private Boolean done;
+	private readonly Stack<Int32> otherBlockEnds;
 
 	public IToken NextToken(Func<IToken> baseNextToken)
 	{
 		if (currentToken == null)
 		{
 			currentToken = baseNextToken();
-			return CreateToken(indentToken.tokenType, indentToken.name);
+			return CreateToken(indentToken.tokenType, indentToken.displayText);
+		}
+		
+		if (otherBlockTerminals.TryGetValue(currentToken.Type, out var end))
+		{
+			otherBlockEnds.Push(end);
+		}
+		else if (otherBlockEnds.Count != 0 && otherBlockEnds.Peek() == currentToken.Type)
+		{
+			otherBlockEnds.Pop();
 		}
 
-		if (currentToken.Type == newlineToken)
-			anyNewlineSinceLastNonTab = true;
-		else if (currentToken.Type == indentationToken)
+		if (otherBlockEnds.Count == 0)
 		{
-			if (anyNewlineSinceLastNonTab)
-				++tabCount;
-		}
-		else if (currentToken.Type == Lexer.Eof)
-		{
-			if (tabCount != currentDentLevel)
-				return GetDentToken();
-			if (!done)
+			if (currentToken.Type == newlineToken)
+				anyNewlineSinceLastNonTab = true;
+			else if (currentToken.Type == indentationToken)
 			{
-				done = true;
-				return CreateToken(dedentToken.tokenType, dedentToken.name);
+				if (anyNewlineSinceLastNonTab)
+					++tabCount;
 			}
-		}
-		else
-		{
-			if (anyNewlineSinceLastNonTab)
+			else if (currentToken.Type == Lexer.Eof)
 			{
-				var dentToken = GetDentToken();
-				if (tabCount == currentDentLevel)
+				if (tabCount != currentDentLevel)
+					return GetDentToken();
+				if (!done)
 				{
-					anyNewlineSinceLastNonTab = false;
-					tabCount = 0;
+					done = true;
+					return CreateToken(dedentToken.tokenType, dedentToken.displayText);
 				}
-				return dentToken;
+			}
+			else
+			{
+				if (anyNewlineSinceLastNonTab)
+				{
+					var dentToken = GetDentToken();
+					if (tabCount == currentDentLevel)
+					{
+						anyNewlineSinceLastNonTab = false;
+						tabCount = 0;
+					}
+					return dentToken;
+				}
 			}
 		}
 
@@ -72,18 +97,18 @@ public sealed class DentHelper
 	{
 		if (tabCount > currentDentLevel) {
 			++currentDentLevel;
-			return CreateToken(indentToken.tokenType, indentToken.name);
+			return CreateToken(indentToken.tokenType, indentToken.displayText);
 		}
 		else if (tabCount < currentDentLevel) {
 			--currentDentLevel;
-			return CreateToken(dedentToken.tokenType, dedentToken.name);
+			return CreateToken(dedentToken.tokenType, dedentToken.displayText);
 		}
 		else
-			return CreateToken(dentToken.tokenType, dentToken.name);
+			return CreateToken(dentToken.tokenType, dentToken.displayText);
 	}
 
-	private CommonToken CreateToken(Int32 type, String name) =>
-		new CommonToken(type, name)
+	private CommonToken CreateToken(Int32 type, String displayText) =>
+		new CommonToken(type, displayText)
 		{
 			Line = currentToken!.Line,
 			Column = currentToken.Column,
