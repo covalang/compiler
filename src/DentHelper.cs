@@ -73,18 +73,15 @@ public sealed class DentHelper
 					return CreateToken(dedentToken.tokenType, dedentToken.displayText);
 				}
 			}
-			else
+			else if (anyNewlineSinceLastNonTab)
 			{
-				if (anyNewlineSinceLastNonTab)
+				var dentToken = GetDentToken();
+				if (tabCount == currentDentLevel)
 				{
-					var dentToken = GetDentToken();
-					if (tabCount == currentDentLevel)
-					{
-						anyNewlineSinceLastNonTab = false;
-						tabCount = 0;
-					}
-					return dentToken;
+					anyNewlineSinceLastNonTab = false;
+					tabCount = 0;
 				}
+				return dentToken;
 			}
 		}
 
