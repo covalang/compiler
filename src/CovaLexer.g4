@@ -10,22 +10,6 @@ tokens { Indent, Dent, Dedent, LinearBodyEnd }
 }
 
 @lexer::members {
-	// public override IToken NextToken() => covaLexerHelper.NextToken(base.NextToken);
-	// private readonly CovaLexerHelper covaLexerHelper = new CovaLexerHelper(
-	// 	new DentHelper(Newline, Tab, (Indent, "►"), (Dent, "■"), (Dedent, "◄")),
-	// 	new LinearHelper(Arrow, (LinearBodyEnd, "♦"),
-	// 		(Indent, Dedent, new [] { Dent, Comma }),
-	// 		(LeftParenthesis, RightParenthesis, new [] { Comma }),
-	// 		(LeftBracket, RightBracket, new [] { Comma })
-	// 	),
-	// 	(LeftBrace, RightBrace),
-	// 	new LinearHelper(Arrow, (LinearBodyEnd, "♦"),
-	// 		(LeftBrace, RightBrace, new [] { SemiColon }),
-	// 		(LeftParenthesis, RightParenthesis, new [] { Comma }),
-	// 		(LeftBracket, RightBracket, new [] { Comma })
-	// 	)
-	// );
-
 	public String GetTokenTypeName(Int32 tokenType) => _SymbolicNames[tokenType];
 
 	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, (Indent, "►"), (Dent, "■"), (Dedent, "◄"),
