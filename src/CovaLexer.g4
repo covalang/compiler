@@ -26,14 +26,16 @@ tokens { Indent, Dent, Dedent, LinearBodyEnd }
 	// 	)
 	// );
 
-	public String GetTokenTypeName(IToken token) => _SymbolicNames[token.Type];
+	public String GetTokenTypeName(Int32 tokenType) => _SymbolicNames[tokenType];
 
-	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, (Indent, "►"), (Dent, "■"), (Dedent, "◄"));
+	private readonly DentHelper dentHelper = new DentHelper(Newline, Tab, (Indent, "►"), (Dent, "■"), (Dedent, "◄"),
+		(LeftBrace, RightBrace)
+	);
 	private readonly LinearHelper linearHelper = new LinearHelper(Arrow, (LinearBodyEnd, "♦"),
-		(Indent, Dedent, new [] { Dent, Comma }),
-		(LeftParenthesis, RightParenthesis, new [] { Comma }),
-		(LeftBracket, RightBracket, new [] { Comma }),
-		(LeftBrace, RightBrace, new [] { SemiColon })
+		(Indent, Dent, Dedent),
+		(LeftBrace, SemiColon, RightBrace),
+		(LeftParenthesis, Comma, RightParenthesis),
+		(LeftBracket, Comma, RightBracket)
 	);
 	public override IToken NextToken() => linearHelper.NextToken(() => dentHelper.NextToken(base.NextToken));
 }
