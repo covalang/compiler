@@ -6,13 +6,14 @@ options {
 
 @header {
 	#pragma warning disable 3021
+	#pragma warning disable 108
 }
 
 file: (namespaceBody | Newline)* EOF;
 
 
 dentedBodyBegin: dentedIgnorable* Indent;
-dentedBodyContinue: dentedIgnorable* (Dent | SemiColon);
+dentedBodyContinue: dentedIgnorable* (Dent | SemiColon Whitespace+);
 dentedBodyEnd: dentedIgnorable* Dedent;
 
 dentedIgnorable: Newline | Tab;
@@ -27,12 +28,17 @@ bracedBodyBegin: anyWhitespace? LeftBrace anyWhitespace?;
 bracedBodyContinue: anyWhitespace? SemiColon anyWhitespace?;
 bracedBodyEnd: anyWhitespace? RightBrace;
 
+//bracedIgnorable: Newline | Tab | Whitespace | Indent | Dent | Dedent;
+
+
 anyWhitespace: (Newline | Tab | Whitespace)+;
 
 
 namespaceMemberDefinition
 	: namespaceDefinition
 	| typeDefinition
+	| functionDefinition
+	| statement
 	;
 
 namespaceDefinition
@@ -74,7 +80,7 @@ functionDefinition
 	: Func Whitespace+ identifier parameters? memberType? (Whitespace+ visibilityModifier)? body?
 	;
 
-parameters: LeftParenthesis parameter (Comma parameter)* RightParenthesis;
+parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
 parameter: identifier (Whitespace+ qualifiedIdentifier)?;
 
 memberType: qualifiedIdentifier;
@@ -129,9 +135,9 @@ statement
 	;
 
 localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
-localDeclaration: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ assignmentOperator Whitespace+ expression);
+localDeclaration: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ assignmentOperator anyWhitespace+ expression);
 
-assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace+ expression;
+assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace* expression;
 
 assignmentOperator: Equals;
 
@@ -205,7 +211,7 @@ multiplicationOperator: Asterisk;
 divisionOperator: Slash;
 moduloOperator: Percent;
 powerOperator: Asterisk Asterisk;
-rootOperator: Backslash Slash;
+rootOperator: Percent Percent;//Backslash Slash;
 
 relationalOperator
 	: equalityOperator
@@ -250,6 +256,7 @@ sequenceOperator: Colon;
 forOperator: For;
 mapOperator: Map;
 foldOperator: Fold;
+joinOperator: Join;
 
 unaryOperator
 	: notOperator
@@ -270,11 +277,12 @@ binaryOperator
 	| forOperator
 	| mapOperator
 	| foldOperator
+	| joinOperator
 	;
 
 expression
-	: LeftParenthesis Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightParenthesis                                  #parenthesisExpression
-	| LeftBracket Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightBracket                                          #bracketExpression
+	: LeftParenthesis Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightParenthesis  #parenthesisExpression
+	| LeftBracket Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightBracket          #bracketExpression
 	| (parameter | parameters) body                                                                        #closureExpression
 	| unaryOperator expression                                                                             #unaryExpression
 	| expression Whitespace* binaryOperator Whitespace* expression                                         #binaryExpression
@@ -297,6 +305,12 @@ expression
 
 arrayExpression
 	: LeftBracket expression (Comma expression)* RightBracket
+	;
+
+bodyExpression
+	: dentedBodyBegin expression dentedBodyEnd
+	| bracedBodyBegin expression bracedBodyEnd
+	| linearBodyBegin expression linearBodyEnd
 	;
 
 atom

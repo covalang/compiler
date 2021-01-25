@@ -1,6 +1,8 @@
 ﻿namespace Test.Cova
 
-	type Program { func Foo { bar = true; baz = false } }
+	type Program {
+		func Foo { bar = true; baz = false }
+	}
 
 
 	type Brogram

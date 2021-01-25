@@ -9,9 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{046B8F0C-E05
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Compiler", "src\Compiler.csproj", "{6795123C-1CA8-47F1-9E24-2D2A42AF1711}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewlineMode.Test", "test\NewlineMode.Test\NewlineMode.Test.csproj", "{9A0D11D8-E40F-4896-88E1-9CA5B45FE9A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NewlineMode.Test", "test\NewlineMode.Test\NewlineMode.Test.csproj", "{9A0D11D8-E40F-4896-88E1-9CA5B45FE9A9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "test\Test\Test.csproj", "{500BCBE0-16AB-4687-B8FE-1044CA0512DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E966EBB6-6555-4BE7-90D2-446C9A692451}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

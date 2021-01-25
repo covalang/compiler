@@ -1,23 +1,45 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
+using LLVMSharp.Interop;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using static CovaParser;
 
-[assembly: System.CLSCompliant(false)]
+[assembly: CLSCompliant(false)]
 
 namespace Cova
 {
 	class Program
 	{
-		static void Main()
+
+		static Task Main(String[] args)
 		{
-			var filename = "Main3.cova";
+			//var result =
+			//	CommandLine
+			//		.Parser
+			//		.Default
+			//		.ParseArguments(args, typeof(Commands).GetNestedTypes())
+			//		.MapResult(
+			//			(Commands.Serve serve) => serve.Debug,
+			//			errors => Console.WriteLine(String.Join(Environment.NewLine, errors))
+			//		);
+
+			return Host.CreateDefaultBuilder().RunConsoleAsync();
+
+			var filename = "Test.cova";
 			var filePath = File.Exists(filename) ? filename : "../../../" + filename;
 			using var fileStream = File.OpenRead(filePath);
-			var inputStream = new AntlrInputStream(fileStream);
+			var inputStream = CharStreams.fromStream(fileStream); //new AntlrInputStream(fileStream);
 			var lexer = new CovaLexer(inputStream);
 
 			// IToken token;
@@ -27,7 +49,7 @@ namespace Cova
 			// while ((token = lexer.NextToken()).Type != Lexer.Eof)
 			// {
 			// 	Console.Write(token.Text);
-			// 	// var tokenTypeName = lexer.GetTokenTypeName(token);
+			// 	// var tokenTypeName = lexer.GetTokenTypeName(token.Type);
 			// 	// if (tokenTypeName == "Newline")
 			// 	// {
 			// 	// 	Console.WriteLine();
@@ -49,51 +71,112 @@ namespace Cova
 			// 	// 	Console.Write(tokenTypeName + " ");
 			// }
 			// lexer.Reset();
+			// fileStream.Position = 0;
 			// return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);
 			var package = new Package("cova");
 
-			var listener = new CovaListener();
+			//using var llvmInitializer = new LLVMInitializer();
+			//using var module = LLVMModuleRef.CreateWithName("NativeBinary");
+			//var builder = module.Context.CreateBuilder();
+
+			//using var connection = new SqliteConnection("Data Source=:memory:");
+			using var connection = new SqliteConnection("Data Source=Sharable;Mode=Memory;Cache=Shared");
+			connection.Open();
+			using var context = new Context(connection);
+			context.Database.EnsureDeleted();
+			context.Database.EnsureCreated();
+			context.Database.ExecuteSqlRaw("pragma auto_vacuum = full;");
+			var funcs = context.Functions.ToList();
+
+			var listener = new CovaListener(filename);
 			ParseTreeWalker.Default.Walk(listener, parser.file());
 		}
 	}
 
-	class CovaListener : CovaParserBaseListener
+	sealed class LLVMInitializer : IDisposable
 	{
+		public LLVMInitializer()
+		{
+			LLVM.InitializeNativeTarget();
+			LLVM.InitializeAllAsmParsers();
+			LLVM.InitializeAllAsmPrinters();
+		}
+
+		public void Dispose() => LLVM.Shutdown();
+	}
+
+	class CovaListener : CovaParserBaseListener, IRootScope
+	{
+		//private readonly Scope fileScope;
+		readonly String filename;
+		public CovaListener(String filename) => this.filename = filename;
+
+		HashSet<IScope> Children { get; } = new HashSet<IScope>();
+		HashSet<IScope> Imported { get; } = new HashSet<IScope>();
+		IReadOnlySet<IScope> IScopeBase.Children => Children;
+		IReadOnlySet<IScope> IScopeBase.Imported => Imported;
+
+
 		private readonly List<ParserRuleContext> qualifierStack = new List<ParserRuleContext>();
-		private String CurrentQualifier => String.Join('.', qualifierStack.SelectMany(x => x is CovaParser.QualifiedIdentifierContext qic ? qic.identifier() : x is CovaParser.IdentifierContext ic ? new[] { ic } : throw new InvalidOperationException()).Select(x => x.GetText()));
-		
-		public override void EnterNamespaceDefinition([NotNull] CovaParser.NamespaceDefinitionContext context)
+
+		private String CurrentQualifier => String.Join('.', CurrentQualifiers.Select(x => x.GetText()));
+
+		private IEnumerable<IdentifierContext> CurrentQualifiers => qualifierStack
+			.SelectMany(
+				x => x switch
+				{
+					QualifiedIdentifierContext qic => qic.identifier(),
+					IdentifierContext ic => new[] { ic },
+					_ => throw new InvalidOperationException()
+				}
+			);
+
+		public override void EnterFile([NotNull] FileContext context)
+		{
+			context.Name = filename;
+			Children.Add(context);
+		}
+
+		public override void EnterNamespaceDefinition(NamespaceDefinitionContext context)
 		{
 			qualifierStack.Add(context.qualifiedIdentifier());
-			Console.WriteLine(CurrentQualifier);
 		}
-		
-		public override void ExitNamespaceDefinition([NotNull] CovaParser.NamespaceDefinitionContext context)
+
+		public override void ExitNamespaceDefinition(NamespaceDefinitionContext context)
 		{
 			qualifierStack.RemoveAt(qualifierStack.Count - 1);
 		}
-		
-		public override void EnterTypeDefinition([NotNull] CovaParser.TypeDefinitionContext context)
+
+		public override void EnterTypeDefinition(TypeDefinitionContext context)
 		{
 			qualifierStack.Add(context.identifier());
-			Console.WriteLine(CurrentQualifier);
-
-
 		}
-		
-		public override void ExitTypeDefinition([NotNull] CovaParser.TypeDefinitionContext context)
+
+		public override void ExitTypeDefinition(TypeDefinitionContext context)
 		{
 			qualifierStack.RemoveAt(qualifierStack.Count - 1);
 		}
-		
-		//public override void EnterLocalDefinition([NotNull] CovaParser.LocalDefinitionContext context)
+
+		public override void EnterFunctionDefinition(FunctionDefinitionContext context)
+		{
+			qualifierStack.Add(context.identifier());
+			//Console.WriteLine(CurrentQualifier);
+
+		}
+
+		public override void ExitFunctionDefinition(FunctionDefinitionContext context)
+		{
+			qualifierStack.RemoveAt(qualifierStack.Count - 1);
+		}
+
+		//public override void EnterLocalDefinition(LocalDefinitionContext context)
 		//{
 		//}
 
-		//public override void EnterSequenceExpression([NotNull] CovaParser.SequenceExpressionContext context)
+		//public override void EnterSequenceExpression(SequenceExpressionContext context)
 		//{
 		//	var expressions = context.expression();
 		//	var lower = expressions[0];
@@ -118,7 +201,7 @@ namespace Cova
 	// 	private readonly Int32 count;
 	// 	public AddNameQualifiersOperation(IEnumerable<String> qualifiers)
 	// 	{
-			
+
 	// 	}
 	// 	public void Dispose() => end?.Invoke();
 	// }
@@ -131,41 +214,112 @@ namespace Cova
 	// 	=>	new Raii(() => nameQualifiers.Add(qualifier), () => nameQualifiers.RemoveAt(nameQualifiers.Count - 1));
 	// }
 
-	abstract class Definition
+	public class Context : DbContext
 	{
-		public String Name { get; }
-		public Definition? Parent { get; }
-		public Definition(String name, Definition? parent)
+		readonly DbConnection dbConnection;
+		
+		public Context(DbConnection dbConnection) => this.dbConnection = dbConnection;
+
+		public DbSet<Package> Packages => Set<Package>();
+		public DbSet<Module> Modules => Set<Module>();
+		public DbSet<Type> Types => Set<Type>();
+		public DbSet<Function> Functions => Set<Function>();
+		public DbSet<Statement> Statements => Set<Statement>();
+		protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite(dbConnection);//("DataSource=file:memdb1?mode=memory&cache=shared");//"Data Source=Graph.db;Cache=Shared");
+		protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.MapTablePerType(this);
+	}
+
+	public static class ModelBuilderExtensions
+	{
+		public static void MapTablePerType(this ModelBuilder modelBuilder, DbContext context)
 		{
-			Name = name;
-			Parent = parent;
+			var entitySets = context
+				.GetType()
+				.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+				.Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+				.Select(x => (entityType: x.PropertyType.GetGenericArguments().Single(), name: x.Name));
+			foreach (var (entityType, name) in entitySets)
+				modelBuilder.Entity(entityType).ToTable(name);
 		}
 	}
-	class Package : Definition
+
+	public abstract class Symbol
 	{
-		public Package(String name) : base(name, null) {}
-		public Dictionary<String, Module> Modules { get; } = new Dictionary<String, Module>();
+		public UInt32 Id { get; private set; }
+		public abstract String Name { get; protected set;  }
 	}
-	class Module : Definition
+
+	public abstract class Definition : Symbol
 	{
-		public Module(String name, Definition? parent) : base(name, parent) {}
-		public Dictionary<String, Module> Modules { get; } = new Dictionary<String, Module>();
-		public Dictionary<String, Type> Types { get; } = new Dictionary<String, Type>();
+		public abstract ParserRuleContext ParserRule { get; }
 	}
-	class Type : Definition
+
+	//sealed class Namespace : Scope
+	//{
+	//	public Namespace(Scope parent) : base(parent) {}
+	//}
+
+	interface IDefinition
 	{
-		public Type(String name, Definition? parent) : base(name, parent) {}
-		public Dictionary<String, Type> Types { get; } = new Dictionary<String, Type>();
-		public Dictionary<String, Function> Functions { get; } = new Dictionary<String, Function>();
+		public Int64 Id { get; }
+		public String Name { get; }
 	}
-	class Function : Definition
+
+	public sealed class Package : IDefinition
 	{
-		public Function(String name, Type parent) : base(name, parent) { }
-		public Dictionary<String, Statement> Statements { get; } = new Dictionary<String, Statement>();
+		private Package() { }
+		public Package(String name) => Name = name;
+
+		public Int64 Id { get; private set; }
+		public String Name { get; }
+		public HashSet<Module> Modules { get; } = new HashSet<Module>();
 	}
-	class Statement : Definition
+
+	public class Module : IDefinition
 	{
-		public Statement(String name, Definition? parent) : base(name, parent) { }
+		private Module() { }
+		public Module(String name) => Name = name;
+
+		public Int64 Id { get; private set; }
+		public String Name { get; private set; } = null!;
+		public Package? Parent { get; set; }
+		public HashSet<Type> Types { get; } = new HashSet<Type>();
+		public HashSet<Function> Functions { get; } = new HashSet<Function>();
+	}
+
+	public class Type : IDefinition
+	{
+		private Type() { }
+		public Type(String name, Module module) => (Name, Module) = (name, module);
+
+		public Int64 Id { get; private set; }
+		public String Name { get; private set; } = null!;
+		public Module Module { get; private set; } = null!;
+		public Type? Parent { get; set; }
+		public HashSet<Type> Types { get; } = new HashSet<Type>();
+		public HashSet<Function> Functions { get; } = new HashSet<Function>();
+	}
+
+	public class Function : IDefinition
+	{
+		private Function() { }
+		public Function(String name, Module module) => (Name, Module) = (name, module);
+
+		public Int64 Id { get; private set; }
+		public String Name { get; private set; } = null!;
+		public Module Module { get; private set; } = null!;
+		public Type? Parent { get; set; }
+		public HashSet<Statement> Statements { get; } = new HashSet<Statement>();
+	}
+
+	public class Statement : IDefinition
+	{
+		private Statement() { }
+		public Statement(String name, Function parent) => (Name, Parent) = (name, parent);
+
+		public Int64 Id { get; private set; }
+		public String Name { get; private set; } = null!;
+		public Function Parent { get; private set; } = null!;
 	}
 
 	// class CovaParserVisitor : CovaParserBaseVisitor<Int32>

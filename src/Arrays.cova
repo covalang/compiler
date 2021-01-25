@@ -1,7 +1,8 @@
 let nums = [1 2 3]
 local nums2 = [1..100];
 
-local odd = nums2 for n where n % 2 != 0
+local odd = nums2 for (n, i) where n % 2 != 0
+local every-other = nums2 for (n, i) where i % 2 != 0
 
 let sum = nums for n fold 0 + n
 let sumPlusOneEach = nums for n fold 0 + (n + 1)
@@ -13,17 +14,35 @@ let reversed = nums[^]
 let first = nums[0]// for n get 1
 let last = nums[^1] for n get ^1
 
-let min = nums .min
+let min = nums map .min
 
 let isTwoInRange = 2 >< nums
 
 let strings = nums for .toString()
 
-let appended = [1 2 3] fold n => "" + n.toString()
+let appended = [1 2 3] fold n -> "" + n.toString()
 
-let csv = nums for n map n => n.toString(), map x => ',' >< x ? `"{x}"` : x , join ','
+let csv = nums for n map n -> n.toString(), map x -> ',' >< x ? `"{x}"` : x , join ','
 
 Env.writeLine(csv);
+
+local rows =
+	[
+		[1, "john", "smith"]
+		[2, "jane", "doe"]
+		[7, "ned", "flanders"]
+	]
+
+rows for row -> row map .to-string map x { ',' >< x ? `"{x}"` : x } join ',' for Env.writeLine
+
+rows for row
+	row map .to-string map x
+		',' >< x then `"{x}"` else x
+	join ','
+	for Env.writeLine
+
+nums map n { n.to-string() } for s -> Env.writeLine(s)
+nums map .to-string map x { ',' >< x ? `"{x}"` : x } join ',' for Env.writeLine
 
 func addOne(n Int) => n + 1
 
@@ -79,7 +98,7 @@ qual System
 			get => data[index]
 			set => data[index] = value
 
-		prop this[index @ Size] => data[index] +
+		prop this[index @ Size] + => data[index]
 
 		prop this[index @ Size] +
 			data[index]

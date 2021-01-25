@@ -45,6 +45,7 @@ Local: 'local';
 For: 'for';
 Map: 'map';
 Fold: 'fold';
+Join: 'join';
 
 // Storage types
 
@@ -103,6 +104,7 @@ LeftParenthesis: '(';
 RightParenthesis: ')';
 LeftBracket: '[';
 RightBracket: ']';
+Question: '?';
 Colon: ':';
 SemiColon: ';';
 Comma: ',';
@@ -145,7 +147,7 @@ fragment HexadecimalPrefix: '0x';
 fragment BinaryPrefix: '0b';
 fragment UnicodePrefix: '0u';
 
-StringLiteral: '"' (EscapedCharacter | ~'"') '"';
+StringLiteral: '"' (EscapedCharacter | ~'"')* '"';
 CharacterLiteral: '\'' (EscapedCharacter | ~'\'') '\'';
 
 fragment EscapedCharacter

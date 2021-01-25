@@ -1,9 +1,5 @@
-type Foo
-	func Bar
-		Env.writeLine("hello")
-
-type Foo -> func Bar -> Env.writeLine("hello")
-
-type Foo {
-		func Bar { Env.writeLine("hello") }
-}
+namespace Foo1.Foo2
+	namespace Foo3.Foo4
+		func Bar
+			local x = 1 + 2
+Foo.Bar()
