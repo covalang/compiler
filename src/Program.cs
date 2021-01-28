@@ -142,7 +142,7 @@ namespace Cova
 
 		public override void EnterNamespaceDefinition(NamespaceDefinitionContext context)
 		{
-			qualifierStack.Add(context.qualifiedIdentifier());
+			qualifierStack.AddRange(context.qualifiedIdentifier().identifier());
 		}
 
 		public override void ExitNamespaceDefinition(NamespaceDefinitionContext context)

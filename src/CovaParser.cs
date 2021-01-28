@@ -1,6 +1,8 @@
-﻿using Cova;
+﻿using Compiler.DefinitionInterfaces;
+using Cova;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class CovaParser
 {
@@ -17,5 +19,10 @@ public partial class CovaParser
 
 		IReadOnlySet<IScope> IScopeBase.Children => Children;
 		IReadOnlySet<IScope> IScopeBase.Imported => Imported;
+	}
+
+	public partial class NamespaceDefinitionContext : INamespaceDefinition
+	{
+		public IEnumerable<String> Names => qualifiedIdentifier().identifier().Select(x => x.GetText());
 	}
 }

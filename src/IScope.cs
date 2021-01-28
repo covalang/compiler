@@ -30,19 +30,25 @@ namespace Cova
 		new IRootScope Parent { get; }
 	}
 
-	abstract class ScopeBase
+	abstract class ScopeBase : IScopeBase
 	{
+		public HashSet<IScope> Children { get; } = new HashSet<IScope>();
+		public HashSet<IScope> Imported { get; } = new HashSet<IScope>();
+
 		private readonly Dictionary<String, Symbol> symbols = new Dictionary<String, Symbol>();
-		public HashSet<Scope> Children { get; } = new HashSet<Scope>();
 		public IReadOnlyDictionary<String, Symbol> Symbols => symbols;
+
+		IReadOnlySet<IScope> IScopeBase.Children => Children;
+		IReadOnlySet<IScope> IScopeBase.Imported => Imported;
 	}
 
 	sealed class RootScope : ScopeBase { }
 
-	abstract class Scope : ScopeBase
+	abstract class Scope : ScopeBase, IScope
 	{
 		public Scope Parent { get; }
 		protected Scope(Scope parent) => Parent = parent;
+		IScopeBase IScope.Parent => Parent;
 	}
 
 	sealed class AnonymousScope : Scope
