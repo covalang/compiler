@@ -94,7 +94,7 @@ Percent: '%';
 Root: '√';
 Octothorp: '#';
 Tilde: '~';
-
+Underscore: '_';
 
 Dot: '.';
 

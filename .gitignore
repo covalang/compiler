@@ -34,3 +34,4 @@ AntlrOutput/
 **/.antlr
 .idea
 **/gen
+CMakeFiles/

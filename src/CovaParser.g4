@@ -107,10 +107,11 @@ writeVisibility: visibility;
 
 visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
 
-publicVisibility: Plus;
+noVisibility: Underscore;
 privateVisibility: Minus;
 protectedVisibility: Octothorp;
 internalVisibility: Tilde;
+publicVisibility: Plus;
 
 
 storageType : staticStorageType;// | instanceStorageType;

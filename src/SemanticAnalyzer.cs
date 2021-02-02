@@ -9,10 +9,10 @@ namespace Cova
 {
 	public class SemanticAnalyzer : IParseTreeListener
 	{
-		readonly RootScope rootScope = new RootScope();
-		//Func<ParserRuleContext, Boolean>? NamedScopePredicate { get; set; } = x => x.GetType().Name == "NamespaceDefinitionContext";
-		//Func<ParserRuleContext, Boolean> AnonymousScopePredicate { get; set; }// = x => x.GetType().Name == "NamespaceDefinitionContext";
-		//Func<ParserRuleContext, Boolean> AliasPredicate { get; set; }
+		readonly RootScope rootScope = new();
+		Func<ParserRuleContext, Boolean>? NamedScopePredicate { get; set; } = x => x.GetType().Name == "NamespaceDefinitionContext";
+		Func<ParserRuleContext, Boolean> AnonymousScopePredicate { get; set; }// = x => x.GetType().Name == "NamespaceDefinitionContext";
+		Func<ParserRuleContext, Boolean> AliasPredicate { get; set; }
 
 		public void EnterEveryRule(ParserRuleContext ctx)
 		{
