@@ -85,7 +85,7 @@ qual System
 qual System
 	type Vector<T> ++
 		field count @ Size +-
-		field data * Array<T> +
+		field data * Array<T> -
 
 		init +
 			count = 0

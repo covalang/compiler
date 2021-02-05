@@ -7,19 +7,19 @@ using Compiler.Symbols;
 
 public partial class CovaParser
 {
-	public partial class FileContext : IFileScope, IFileSymbol
+	public partial class FileContext// : IFileScope, IFileSymbol
 	{
-		IRootScope RootScope { get; set; }
-		HashSet<IScope> Children { get; } = new HashSet<IScope>();
-		HashSet<IScope> Imported { get; } = new HashSet<IScope>();
+		//IRootScope RootScope { get; set; }
+		//HashSet<IScope> Children { get; } = new HashSet<IScope>();
+		//HashSet<IScope> Imported { get; } = new HashSet<IScope>();
 
-		public String Name { get; internal set; }
+		//public String Name { get; internal set; }
 
-		IRootScope IFileScope.Parent => RootScope;
-		IScopeBase IScope.Parent => RootScope;
+		//IRootScope IFileScope.Parent => RootScope;
+		//IScopeBase IScope.Parent => RootScope;
 
-		IReadOnlySet<IScope> IScopeBase.Children => Children;
-		IReadOnlySet<IScope> IScopeBase.Imported => Imported;
+		//IReadOnlySet<IScope> IScopeBase.Children => Children;
+		//IReadOnlySet<IScope> IScopeBase.Imported => Imported;
 	}
 
 	public partial class NamespaceDefinitionContext : INamespaceDefinition

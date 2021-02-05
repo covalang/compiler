@@ -1,6 +1,8 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
+using Compiler.Symbols;
+using Cova.Scopes;
 using LLVMSharp.Interop;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -91,7 +93,9 @@ namespace Cova
 			context.Database.ExecuteSqlRaw("pragma auto_vacuum = full;");
 			var funcs = context.Functions.ToList();
 
-			var listener = new CovaListener(filename);
+			var rootScope = new RootScope();
+			var fileScope = new FileScope(filename, rootScope);
+			var listener = new CovaListener(fileScope);
 			ParseTreeWalker.Default.Walk(listener, parser.file());
 		}
 	}
@@ -108,17 +112,13 @@ namespace Cova
 		public void Dispose() => LLVM.Shutdown();
 	}
 
-	class CovaListener : CovaParserBaseListener, IRootScope
+	class CovaListener : CovaParserBaseListener
 	{
 		//private readonly Scope fileScope;
-		readonly String filename;
-		public CovaListener(String filename) => this.filename = filename;
-
-		HashSet<IScope> Children { get; } = new HashSet<IScope>();
-		HashSet<IScope> Imported { get; } = new HashSet<IScope>();
-		IReadOnlySet<IScope> IScopeBase.Children => Children;
-		IReadOnlySet<IScope> IScopeBase.Imported => Imported;
-
+		readonly FileScope fileScope;
+		IScope currentScope;
+		IContainer currentContainer;
+		public CovaListener(FileScope fileScope) => (this.fileScope, currentScope) = (fileScope, fileScope);
 
 		private readonly List<ParserRuleContext> qualifierStack = new List<ParserRuleContext>();
 
@@ -133,12 +133,6 @@ namespace Cova
 					_ => throw new InvalidOperationException()
 				}
 			);
-
-		public override void EnterFile([NotNull] FileContext context)
-		{
-			context.Name = filename;
-			Children.Add(context);
-		}
 
 		public override void EnterNamespaceDefinition(NamespaceDefinitionContext context)
 		{
@@ -233,11 +227,10 @@ namespace Cova
 	{
 		public static void MapTablePerType(this ModelBuilder modelBuilder, DbContext context)
 		{
-			var entitySets = context
-				.GetType()
-				.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-				.Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
-				.Select(x => (entityType: x.PropertyType.GetGenericArguments().Single(), name: x.Name));
+			var entitySets =
+				from x in context.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+				where x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition().IsAssignableTo(typeof(DbSet<>))
+				select (entityType: x.PropertyType.GetGenericArguments().Single(), name: x.Name);
 			foreach (var (entityType, name) in entitySets)
 				modelBuilder.Entity(entityType).ToTable(name);
 		}
@@ -259,48 +252,47 @@ namespace Cova
 	//	public Namespace(Scope parent) : base(parent) {}
 	//}
 
-	interface IDefinition
+	public interface IDefinition
 	{
 		public Int64 Id { get; }
 		public String Name { get; }
 	}
 
-	public sealed class Package : IDefinition
+	public sealed class Package : IDefinition, IHasModules
 	{
 		private Package() { }
 		public Package(String name) => Name = name;
 
-		public Int64 Id { get; private set; }
-		public String Name { get; }
+		public Int64 Id { get; private init; }
+		public String Name { get; } = null!;
 		public HashSet<Module> Modules { get; } = new HashSet<Module>();
 	}
 
-	public class Module : IDefinition
+	public class Module : IDefinition, IHasParent<Package>, IHasTypes, IHasFunctions
 	{
-		private Module() { }
-		public Module(String name) => Name = name;
+		public Module(String name, Package parent) => (Name, Parent) = (name, parent);
 
-		public Int64 Id { get; private set; }
-		public String Name { get; private set; } = null!;
-		public Package? Parent { get; set; }
+		public Int64 Id { get; }
+		public String Name { get; }
+		public Package Parent { get; }
 		public HashSet<Type> Types { get; } = new HashSet<Type>();
 		public HashSet<Function> Functions { get; } = new HashSet<Function>();
 	}
 
-	public class Type : IDefinition
+	public class Type : IDefinition, IHasTypes, IHasFunctions
 	{
 		private Type() { }
 		public Type(String name, Module module) => (Name, Module) = (name, module);
 
-		public Int64 Id { get; private set; }
-		public String Name { get; private set; } = null!;
-		public Module Module { get; private set; } = null!;
+		public Int64 Id { get; private init; }
+		public String Name { get; private init; } = null!;
+		public Module Module { get; private init; } = null!;
 		public Type? Parent { get; set; }
 		public HashSet<Type> Types { get; } = new HashSet<Type>();
 		public HashSet<Function> Functions { get; } = new HashSet<Function>();
 	}
 
-	public class Function : IDefinition
+	public class Function : IDefinition, IHasStatements
 	{
 		private Function() { }
 		public Function(String name, Module module) => (Name, Module) = (name, module);
@@ -320,6 +312,17 @@ namespace Cova
 		public Int64 Id { get; private set; }
 		public String Name { get; private set; } = null!;
 		public Function Parent { get; private set; } = null!;
+	}
+
+	public interface IHasModules { public HashSet<Module> Modules { get; } }
+	public interface IHasTypes { public HashSet<Type> Types { get; } }
+	public interface IHasFunctions { public HashSet<Function> Functions { get; } }
+	public interface IHasStatements { public HashSet<Statement> Statements { get; } }
+	public interface IHasParent { public IDefinition Parent { get; } }
+	public interface IHasParent<TParent> : IHasParent where TParent : IDefinition
+	{
+		public new TParent Parent { get; }
+		IDefinition IHasParent.Parent => Parent;
 	}
 
 	// class CovaParserVisitor : CovaParserBaseVisitor<Int32>

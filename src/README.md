@@ -40,8 +40,8 @@ visibility modifiers
 ~	internal
 
 instance semantics modifiers
-|	(blank) immutable value
-!	mutable value
+	(blank) immutable value
+@	mutable value
 *	mutable reference to mutable instance
 ^	mutable reference to immutable instance
 &	immutable reference to mutable instance

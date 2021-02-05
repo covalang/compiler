@@ -3,15 +3,20 @@ using System.Collections.Immutable;
 
 namespace Compiler.Symbols
 {
-	public enum Visibility { None, Private, Protected, Internal, Public };
-	
+	public enum Visibility { None, Private, Protected, Internal, ProtectedAndInternal, ProtectedOrInternal, Public }
+	public enum InstanceDependence { Value, Reference }
+	public enum Mutability { Immutable, Mutable }
+	public enum Nullability { NonNullable, Nullable }
+	public enum Sharability { Local, Global }
+
 	public interface ISymbol
 	{
 		String Name { get; }
-		Visibility LocalReadVisibility { get; }
-		Visibility LocalWriteVisibility { get; }
-		Visibility GlobalReadVisibility { get; }
-		Visibility GlobalWriteVisibility { get; }
+		Visibility Visibility { get; }
+		InstanceDependence InstanceDependence { get; }
+		Mutability Mutability { get; }
+		Nullability Nullability { get; }
+		Sharability Sharability { get; }
 	}
 
 	public interface IAlias : ISymbol { }

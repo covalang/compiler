@@ -1,43 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using Compiler.Symbols;
 
 namespace Cova.Scopes
 {
-	interface IReadOnlyScopeBase
+	interface IScopeBase
 	{
-		IReadOnlySet<IScope> Children { get; }
-		IReadOnlySet<IScope> Imported { get; }
-		IReadOnlySet<Symbol> Symbols { get; }
-	}
-	
-	interface IScopeBase : IReadOnlyScopeBase
-	{
-		new HashSet<IScope> Children { get; }
-		new HashSet<IScope> Imported { get; }
-		new HashSet<Symbol> Symbols { get; }
-
-		IReadOnlySet<IScope> IReadOnlyScopeBase.Children => Children;
-		IReadOnlySet<IScope> IReadOnlyScopeBase.Imported => Imported;
-		IReadOnlySet<Symbol> IReadOnlyScopeBase.Symbols => Symbols;
+		HashSet<IScope> Children { get; init; }
+		HashSet<IScope> Imported { get; init; }
+		HashSet<ISymbol> Symbols { get; init; }
 	}
 
 	interface IRootScope : IScopeBase { }
 
-	interface IReadOnlyScope : IReadOnlyScopeBase
+	interface IScope : IScopeBase
 	{
-		IReadOnlyScopeBase Parent { get; }
-	}
-	interface IScope : IReadOnlyScope, IScopeBase
-	{
-		new IScopeBase Parent { get; }
-		IReadOnlyScopeBase IReadOnlyScope.Parent => Parent;
+		IScopeBase Parent { get; init; }
 	}
 
 	interface IAnonymousScope : IScope { }
 
 	interface INamedScope : IScope
 	{
-		String Name { get; }
+		String Name { get; init; }
 	}
 
 	// interface IFileScope : INamedScope
