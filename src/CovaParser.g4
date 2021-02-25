@@ -42,7 +42,7 @@ namespaceMemberDefinition
 	;
 
 namespaceDefinition
-	: Namespace Whitespace+ qualifiedIdentifier (Whitespace+ visibilityModifier)? namespaceBody?
+	: Namespace Whitespace+ qualifiedIdentifier (Whitespace+ visibility)? namespaceBody?
 	;
 
 namespaceBody
@@ -52,7 +52,7 @@ namespaceBody
 	;
 
 typeDefinition
-	: Type Whitespace+ (typeKind Whitespace+)? identifier (Whitespace+ visibilityModifier)? typeBody?
+	: Type Whitespace+ (typeKind Whitespace+)? identifier (Whitespace+ visibility)? typeBody?
 	;
 
 typeBody
@@ -69,15 +69,15 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType (Whitespace+ visibilityModifier)?
+	: Field Whitespace+ identifier Whitespace+ storageType? Whitespace+ memberType (Whitespace+ visibility)?
 	;
 
 propertyDefinition
-	: Prop Whitespace+ storageType? Whitespace+ identifier Whitespace+ memberType
+	: Prop Whitespace+ identifier Whitespace+ storageType? Whitespace+ memberType
 	;
 
 functionDefinition
-	: Func Whitespace+ identifier parameters? memberType? (Whitespace+ visibilityModifier)? body?
+	: Func Whitespace+ identifier parameters? memberType? (Whitespace+ visibility)? body?
 	;
 
 parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
@@ -100,18 +100,18 @@ identifier
 	;
 
 
-visibilityModifier: readVisibility writeVisibility?;
+visibility
+    : Minus #privateVisibility
+    | Octothorp #protectedVisibility
+    | Tilde #internalVisibility
+    | Plus #publicVisibility
+    ;
 
-readVisibility: visibility;
-writeVisibility: visibility;
-
-visibility : publicVisibility | privateVisibility | protectedVisibility | internalVisibility;
-
-noVisibility: Underscore;
-privateVisibility: Minus;
-protectedVisibility: Octothorp;
-internalVisibility: Tilde;
-publicVisibility: Plus;
+//noVisibility: Underscore;
+//privateVisibility: Minus;
+//protectedVisibility: Octothorp;
+//internalVisibility: Tilde;
+//publicVisibility: Plus;
 
 
 storageType : staticStorageType;// | instanceStorageType;

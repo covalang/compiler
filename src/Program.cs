@@ -9,13 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using static CovaParser;
 
 [assembly: CLSCompliant(false)]
 
@@ -40,8 +37,8 @@ namespace Cova
 
 			var filename = "Test.cova";
 			var filePath = File.Exists(filename) ? filename : "../../../" + filename;
-			using var fileStream = File.OpenRead(filePath);
-			var inputStream = CharStreams.fromStream(fileStream); //new AntlrInputStream(fileStream);
+			var fileContents = File.ReadAllText(filePath);
+			var inputStream = new CodePointCharStream(fileContents) { name = filePath };
 			var lexer = new CovaLexer(inputStream);
 
 			// IToken token;
@@ -78,7 +75,7 @@ namespace Cova
 
 			var commonTokenStream = new CommonTokenStream(lexer);
 			var parser = new CovaParser(commonTokenStream);
-			var package = new Package("cova");
+			var package = new Package { Name = "Cova" };
 
 			//using var llvmInitializer = new LLVMInitializer();
 			//using var module = LLVMModuleRef.CreateWithName("NativeBinary");
@@ -112,73 +109,6 @@ namespace Cova
 		public void Dispose() => LLVM.Shutdown();
 	}
 
-	class CovaListener : CovaParserBaseListener
-	{
-		//private readonly Scope fileScope;
-		readonly FileScope fileScope;
-		IScope currentScope;
-		IContainer currentContainer;
-		public CovaListener(FileScope fileScope) => (this.fileScope, currentScope) = (fileScope, fileScope);
-
-		private readonly List<ParserRuleContext> qualifierStack = new List<ParserRuleContext>();
-
-		private String CurrentQualifier => String.Join('.', CurrentQualifiers.Select(x => x.GetText()));
-
-		private IEnumerable<IdentifierContext> CurrentQualifiers => qualifierStack
-			.SelectMany(
-				x => x switch
-				{
-					QualifiedIdentifierContext qic => qic.identifier(),
-					IdentifierContext ic => new[] { ic },
-					_ => throw new InvalidOperationException()
-				}
-			);
-
-		public override void EnterNamespaceDefinition(NamespaceDefinitionContext context)
-		{
-			qualifierStack.AddRange(context.qualifiedIdentifier().identifier());
-		}
-
-		public override void ExitNamespaceDefinition(NamespaceDefinitionContext context)
-		{
-			qualifierStack.RemoveAt(qualifierStack.Count - 1);
-		}
-
-		public override void EnterTypeDefinition(TypeDefinitionContext context)
-		{
-			qualifierStack.Add(context.identifier());
-		}
-
-		public override void ExitTypeDefinition(TypeDefinitionContext context)
-		{
-			qualifierStack.RemoveAt(qualifierStack.Count - 1);
-		}
-
-		public override void EnterFunctionDefinition(FunctionDefinitionContext context)
-		{
-			qualifierStack.Add(context.identifier());
-			//Console.WriteLine(CurrentQualifier);
-
-		}
-
-		public override void ExitFunctionDefinition(FunctionDefinitionContext context)
-		{
-			qualifierStack.RemoveAt(qualifierStack.Count - 1);
-		}
-
-		//public override void EnterLocalDefinition(LocalDefinitionContext context)
-		//{
-		//}
-
-		//public override void EnterSequenceExpression(SequenceExpressionContext context)
-		//{
-		//	var expressions = context.expression();
-		//	var lower = expressions[0];
-		//	var upper = expressions[1];
-		//	var interval = expressions[3];
-		//}
-	}
-
 	class Raii : IDisposable
 	{
 		private readonly Action end;
@@ -208,34 +138,6 @@ namespace Cova
 	// 	=>	new Raii(() => nameQualifiers.Add(qualifier), () => nameQualifiers.RemoveAt(nameQualifiers.Count - 1));
 	// }
 
-	public class Context : DbContext
-	{
-		readonly DbConnection dbConnection;
-		
-		public Context(DbConnection dbConnection) => this.dbConnection = dbConnection;
-
-		public DbSet<Package> Packages => Set<Package>();
-		public DbSet<Module> Modules => Set<Module>();
-		public DbSet<Type> Types => Set<Type>();
-		public DbSet<Function> Functions => Set<Function>();
-		public DbSet<Statement> Statements => Set<Statement>();
-		protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite(dbConnection);//("DataSource=file:memdb1?mode=memory&cache=shared");//"Data Source=Graph.db;Cache=Shared");
-		protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.MapTablePerType(this);
-	}
-
-	public static class ModelBuilderExtensions
-	{
-		public static void MapTablePerType(this ModelBuilder modelBuilder, DbContext context)
-		{
-			var entitySets =
-				from x in context.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-				where x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition().IsAssignableTo(typeof(DbSet<>))
-				select (entityType: x.PropertyType.GetGenericArguments().Single(), name: x.Name);
-			foreach (var (entityType, name) in entitySets)
-				modelBuilder.Entity(entityType).ToTable(name);
-		}
-	}
-
 	public abstract class Symbol
 	{
 		public UInt32 Id { get; private set; }
@@ -251,79 +153,6 @@ namespace Cova
 	//{
 	//	public Namespace(Scope parent) : base(parent) {}
 	//}
-
-	public interface IDefinition
-	{
-		public Int64 Id { get; }
-		public String Name { get; }
-	}
-
-	public sealed class Package : IDefinition, IHasModules
-	{
-		private Package() { }
-		public Package(String name) => Name = name;
-
-		public Int64 Id { get; private init; }
-		public String Name { get; } = null!;
-		public HashSet<Module> Modules { get; } = new HashSet<Module>();
-	}
-
-	public class Module : IDefinition, IHasParent<Package>, IHasTypes, IHasFunctions
-	{
-		public Module(String name, Package parent) => (Name, Parent) = (name, parent);
-
-		public Int64 Id { get; }
-		public String Name { get; }
-		public Package Parent { get; }
-		public HashSet<Type> Types { get; } = new HashSet<Type>();
-		public HashSet<Function> Functions { get; } = new HashSet<Function>();
-	}
-
-	public class Type : IDefinition, IHasTypes, IHasFunctions
-	{
-		private Type() { }
-		public Type(String name, Module module) => (Name, Module) = (name, module);
-
-		public Int64 Id { get; private init; }
-		public String Name { get; private init; } = null!;
-		public Module Module { get; private init; } = null!;
-		public Type? Parent { get; set; }
-		public HashSet<Type> Types { get; } = new HashSet<Type>();
-		public HashSet<Function> Functions { get; } = new HashSet<Function>();
-	}
-
-	public class Function : IDefinition, IHasStatements
-	{
-		private Function() { }
-		public Function(String name, Module module) => (Name, Module) = (name, module);
-
-		public Int64 Id { get; private set; }
-		public String Name { get; private set; } = null!;
-		public Module Module { get; private set; } = null!;
-		public Type? Parent { get; set; }
-		public HashSet<Statement> Statements { get; } = new HashSet<Statement>();
-	}
-
-	public class Statement : IDefinition
-	{
-		private Statement() { }
-		public Statement(String name, Function parent) => (Name, Parent) = (name, parent);
-
-		public Int64 Id { get; private set; }
-		public String Name { get; private set; } = null!;
-		public Function Parent { get; private set; } = null!;
-	}
-
-	public interface IHasModules { public HashSet<Module> Modules { get; } }
-	public interface IHasTypes { public HashSet<Type> Types { get; } }
-	public interface IHasFunctions { public HashSet<Function> Functions { get; } }
-	public interface IHasStatements { public HashSet<Statement> Statements { get; } }
-	public interface IHasParent { public IDefinition Parent { get; } }
-	public interface IHasParent<TParent> : IHasParent where TParent : IDefinition
-	{
-		public new TParent Parent { get; }
-		IDefinition IHasParent.Parent => Parent;
-	}
 
 	// class CovaParserVisitor : CovaParserBaseVisitor<Int32>
 	// {
@@ -366,3 +195,86 @@ namespace Cova
 	// 	}
 	// }
 }
+
+public static class TextSourceExtensions
+{
+	public static TextSourceSpan ToTextSourceSpan(this ParserRuleContext context)
+	{
+		var start = new TextSource(
+			context.Start.TokenSource.SourceName,
+			(UInt64) context.Start.StartIndex,
+			(UInt64) context.Start.Column,
+			(UInt64) context.Start.Line);
+		
+		var stop = new TextSource(
+			context.Stop.TokenSource.SourceName,
+			(UInt64) context.Stop.StartIndex,
+			(UInt64) context.Stop.Column,
+			(UInt64) context.Stop.Line);
+		
+		return new TextSourceSpan(start, stop);
+	}
+}
+
+public sealed record TextSource(String Path, UInt64 Offset, UInt64 Line, UInt64 Column);
+public sealed record TextSourceSpan(TextSource Start, TextSource Stop);
+
+public interface IDefinition
+{
+	UInt64 Id { get; }
+	String Name { get; }
+	TextSourceSpan Location { get; }
+	IDefinition? Parent { get; }
+}
+
+public abstract class Definition
+{
+	public UInt64 Id { get; private set; }
+	public String Name { get; set; } = null!;
+}
+
+public abstract class SourceTextDefinition : Definition
+{
+	public TextSourceSpan Location { get; set; } = null!;
+	public IDefinition? Parent { get; set; }
+}
+
+public sealed class Package : Definition, IHasModules
+{	
+	public HashSet<Module> Modules { get; } = new();
+}
+
+public class Module : Definition, IHasTypes, IHasFunctions
+{
+	public HashSet<Type> Types { get; } = new();
+	public HashSet<Function> Functions { get; } = new();
+}
+
+public class Type : SourceTextDefinition, IHasTypes, IHasFunctions
+{
+	public Module Module { get; set; } = null!;
+	public HashSet<Type> Types { get; } = new();
+	public HashSet<Function> Functions { get; } = new();
+}
+
+public class Function : SourceTextDefinition, IHasStatements
+{
+	public Module Module { get; set; } = null!;
+	public HashSet<Statement> Statements { get; } = new();
+}
+
+public class Statement : SourceTextDefinition
+{
+	public new Function Parent { get; private set; } = null!;
+}
+
+public interface IHasModules { public HashSet<Module> Modules { get; } }
+public interface IHasTypes { public HashSet<Type> Types { get; } }
+public interface IHasFunctions { public HashSet<Function> Functions { get; } }
+public interface IHasStatements { public HashSet<Statement> Statements { get; } }
+//public interface IHasParent { public IDefinition Parent { get; } }
+//public interface IHasParent<TParent> : IHasParent where TParent : IDefinition
+//{
+//	public new TParent Parent { get; }
+//	IDefinition IHasParent.Parent => Parent;
+//}
