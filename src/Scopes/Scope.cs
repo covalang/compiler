@@ -13,10 +13,11 @@ namespace Cova.Scopes
 
 	sealed class RootScope : ScopeBase { }
 
-	abstract class Scope : ScopeBase, IScope
+	abstract class Scope : ScopeBase
 	{
-		public IScopeBase Parent { get; init; }
-		protected Scope(IScopeBase parent) => Parent = parent;
+		public ScopeBase Parent { get; init; }
+
+		protected Scope(ScopeBase parent) => Parent = parent;
 	}
 
 	sealed class AnonymousScope : Scope

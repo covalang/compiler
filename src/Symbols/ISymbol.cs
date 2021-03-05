@@ -12,16 +12,21 @@ namespace Compiler.Symbols
 	public enum InstanceDependency : Byte { Value, Reference } // Independent, Interdependent
 	public enum ThreadShareability : Byte { Local, Global }
 
-	public struct Location
-	{
-		public UInt32 Offset;
-		public UInt32 Line;
-		public UInt32 Column;
-	}
-
 	public interface ISymbol
 	{
-		String Name { get; }
+		DefinitionSource DefinitionSource { get; }
+	}
+
+	public interface IScope
+	{
+		OrderedSet<IScope> Children { get; set; }
+		OrderedSet<IScope> Imported { get; set; }
+		OrderedSet<ISymbol> Symbols { get; set; }
+		IScope? Parent { get; set; }
+	}
+
+	public interface IStorageReferencing
+	{
 		Ownership Ownership { get; }
 		Visibility Visibility { get; }
 		Mutability Mutability { get; }
@@ -30,37 +35,75 @@ namespace Compiler.Symbols
 		CyclePossibility CyclePossibility { get; }
 		InstanceDependency InstanceDependency { get; }
 		ThreadShareability ThreadShareability { get; }
-		ImmutableArray<(Location start, Location stop)> LocationPairs { get; }
 	}
 
-	public interface IAlias : ISymbol
+	public interface IAlias : IAlias<ISymbol> {}
+	public interface IAlias<out TSymbol> : ISymbol where TSymbol : ISymbol
 	{
-		ISymbol Aliased { get; }
+		TSymbol Aliased { get; }
 	}
+	public interface INamespaceImport : IAlias<INamespace> {}
+	public interface ITypeAlias : IAlias<IType>, IHasName {}
 
-	public interface IFunctionSymbol : ISymbol
+	public interface IPackage : ISymbol, IHasName, IHasModules {}
+	public interface IModule : ISymbol, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
+	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasAliases, IHasTypes, IHasFunctions {}
+
+	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements {}
+	public interface IGenericFunction : IFunction, IHasTypeParameters {}
+
+	public interface IType : ISymbol, IScope, IHasTypes, IHasFunctions, IHasFields, IHasProperties
 	{
-		ImmutableArray<ITypeParameterSymbol> TypeParameters { get; }
-		ImmutableArray<IParameterSymbol> Parameters { get; }
-		ImmutableArray<ITypeSymbol> ReturnType { get; }
+		OrderedSet<IInterface> Extends { get; }
+		OrderedSet<IType> Implements { get; }
 	}
+	public interface IGenericType : IType, IHasTypeParameters {}
+	
+	public interface IDelegate : IType {}
 
-	public interface ITypeSymbol : ISymbol
+	public interface ILocal : ISymbol, IHasName, IStorageReferencing {}
+	public interface IField : ISymbol, IHasName, IStorageReferencing {}
+
+	public interface IProperty : ISymbol, IHasName
 	{
-		ImmutableArray<ITypeParameterSymbol> TypeParameters { get; }
-		ImmutableArray<INamespaceSymbol> Namespaces { get; }
+		IFunction Getter { get; }
+		IFunction Setter { get; }
 	}
+	public interface IStatement : ISymbol {}
 
-	public interface ILocalSymbol : ISymbol { }
-	public interface IFieldSymbol : ISymbol { }
-	public interface IPropertySymbol : ISymbol { }
+	public interface IParameter : ISymbol, IHasName, IHasType {}
+	public interface ITypeParameter : IParameter {}
 	
-	public interface IParameterSymbol : ITypeSymbol { }
-	public interface ITypeParameterSymbol : ITypeSymbol { }
+	public interface IInterface : ISymbol, IScope, IHasName {}
+	public interface ITrait : ISymbol, IScope, IHasName {}
+	public interface IStruct : IHasName, IType, IHasTypes, IHasFunctions {}
+	public interface IClass : IHasName, IType, IHasTypes, IHasFunctions {}
 	
-	public interface INamespaceSymbol : ISymbol { }
-	public interface IStructSymbol : ITypeSymbol { }
-	public interface IClassSymbol : ITypeSymbol { }
+	public interface IHasName { String Name { get; } }
+	public interface IHasType { IType Type { get; } }
+	public interface IHasOwnership { Ownership Ownership { get; } }
+	public interface IHasVisibility { Visibility Visibility { get; } }
+	public interface IHasMutability { Mutability Mutability { get; } }
+	public interface IHasNullability { Nullability Nullability { get; } }
+	public interface IHasStorageType { StorageType StorageType { get; } }
+	public interface IHasCyclePossibility { CyclePossibility CyclePossibility { get; } }
+	public interface IHasInstanceDependency { InstanceDependency InstanceDependency { get; } }
+	public interface IHasThreadShareability { ThreadShareability ThreadShareability { get; } }
 	
-	// interface IFileSymbol { }
+	public interface IHasModules { OrderedSet<IModule> Modules { get; } }
+	public interface IHasScopes { OrderedSet<IScope> Scopes { get; } }
+	public interface IHasAliases { OrderedSet<IAlias> Aliases { get; } }
+	public interface IHasNamespaces { OrderedSet<INamespace> Namespaces { get; } }
+	public interface IHasTypes { OrderedSet<IType> Types { get; } }
+	public interface IHasInterfaces { OrderedSet<IType> Interfaces { get; } }
+	public interface IHasTraits { OrderedSet<IType> Traits { get; } }
+	public interface IHasFields { OrderedSet<IField> Fields { get; } }
+	public interface IHasProperties { OrderedSet<IProperty> Properties { get; } }
+	public interface IHasFunctions { OrderedSet<IFunction> Functions { get; } }
+	public interface IHasParameters { OrderedSet<IParameter> Parameters { get; } }
+	public interface IHasLocals { OrderedSet<ILocal> Locals { get; } }
+	public interface IHasStatements { OrderedSet<IStatement> Statements { get; } }
+	public interface IHasTypeParameters { OrderedSet<ITypeParameter> TypeParameters { get; } }
+	
+	public interface IExtends { OrderedSet<IType> BaseTypes { get; } }
 }

@@ -14,8 +14,10 @@ static class IDefinitionExtensions
 		return default;
 	}
 
-	public static T FindAncestor<T>(this IDefinition? definition) =>
-		definition.FindAncestorOrNull<T>() ?? throw new AncestorNotFoundException<T>();
+	public static T FindAncestor<T>(this IDefinition? definition)
+	{
+		return definition.FindAncestorOrNull<T>() ?? throw new AncestorNotFoundException<T>();
+	}
 
 	sealed class AncestorNotFoundException<T> : ArgumentException
 	{

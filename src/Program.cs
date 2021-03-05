@@ -32,7 +32,7 @@ namespace Cova
 			//			(Commands.Serve serve) => serve.Debug,
 			//			errors => Console.WriteLine(String.Join(Environment.NewLine, errors))
 			//		);
-
+			
 			return Host.CreateDefaultBuilder().RunConsoleAsync();
 
 			var filename = "Test.cova";
@@ -92,7 +92,7 @@ namespace Cova
 
 			var rootScope = new RootScope();
 			var fileScope = new FileScope(filename, rootScope);
-			var listener = new CovaListener(fileScope);
+			var listener = new CovaListener(fileScope, new Module());
 			ParseTreeWalker.Default.Walk(listener, parser.file());
 		}
 	}
@@ -233,7 +233,7 @@ public abstract class Definition
 	public String Name { get; set; } = null!;
 }
 
-public abstract class SourceTextDefinition : Definition
+public abstract class SourceTextDefinition : Definition, IDefinition
 {
 	public TextSourceSpan Location { get; set; } = null!;
 	public IDefinition? Parent { get; set; }
