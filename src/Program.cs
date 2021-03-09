@@ -196,85 +196,88 @@ namespace Cova
 	// }
 }
 
-public static class TextSourceExtensions
+namespace Cova.Definitions
 {
-	public static TextSourceSpan ToTextSourceSpan(this ParserRuleContext context)
+	public static class TextSourceExtensions
 	{
-		var start = new TextSource(
-			context.Start.TokenSource.SourceName,
-			(UInt64) context.Start.StartIndex,
-			(UInt64) context.Start.Column,
-			(UInt64) context.Start.Line);
-		
-		var stop = new TextSource(
-			context.Stop.TokenSource.SourceName,
-			(UInt64) context.Stop.StartIndex,
-			(UInt64) context.Stop.Column,
-			(UInt64) context.Stop.Line);
-		
-		return new TextSourceSpan(start, stop);
+		public static TextSourceSpan ToTextSourceSpan(this ParserRuleContext context)
+		{
+			var start = new TextSource(
+				context.Start.TokenSource.SourceName,
+				(UInt64)context.Start.StartIndex,
+				(UInt64)context.Start.Column,
+				(UInt64)context.Start.Line);
+
+			var stop = new TextSource(
+				context.Stop.TokenSource.SourceName,
+				(UInt64)context.Stop.StartIndex,
+				(UInt64)context.Stop.Column,
+				(UInt64)context.Stop.Line);
+
+			return new TextSourceSpan(start, stop);
+		}
 	}
+
+	public sealed record TextSource(String Path, UInt64 Offset, UInt64 Line, UInt64 Column);
+	public sealed record TextSourceSpan(TextSource Start, TextSource Stop);
+
+	public interface IDefinition
+	{
+		UInt64 Id { get; }
+		String Name { get; }
+		TextSourceSpan Location { get; }
+		IDefinition? Parent { get; }
+	}
+
+	public abstract class Definition
+	{
+		public UInt64 Id { get; private set; }
+		public String Name { get; set; } = null!;
+	}
+
+	public abstract class SourceTextDefinition : Definition, IDefinition
+	{
+		public TextSourceSpan Location { get; set; } = null!;
+		public IDefinition? Parent { get; set; }
+	}
+
+	public sealed class Package : Definition, IHasModules
+	{
+		public HashSet<Module> Modules { get; } = new();
+	}
+
+	public class Module : Definition, IHasTypes, IHasFunctions
+	{
+		public HashSet<Type> Types { get; } = new();
+		public HashSet<Function> Functions { get; } = new();
+	}
+
+	public class Type : SourceTextDefinition, IHasTypes, IHasFunctions
+	{
+		public Module Module { get; set; } = null!;
+		public HashSet<Type> Types { get; } = new();
+		public HashSet<Function> Functions { get; } = new();
+	}
+
+	public class Function : SourceTextDefinition, IHasStatements
+	{
+		public Module Module { get; set; } = null!;
+		public HashSet<Statement> Statements { get; } = new();
+	}
+
+	public class Statement : SourceTextDefinition
+	{
+		public new Function Parent { get; private set; } = null!;
+	}
+
+	public interface IHasModules { public HashSet<Module> Modules { get; } }
+	public interface IHasTypes { public HashSet<Type> Types { get; } }
+	public interface IHasFunctions { public HashSet<Function> Functions { get; } }
+	public interface IHasStatements { public HashSet<Statement> Statements { get; } }
+	//public interface IHasParent { public IDefinition Parent { get; } }
+	//public interface IHasParent<TParent> : IHasParent where TParent : IDefinition
+	//{
+	//	public new TParent Parent { get; }
+	//	IDefinition IHasParent.Parent => Parent;
+	//}
 }
-
-public sealed record TextSource(String Path, UInt64 Offset, UInt64 Line, UInt64 Column);
-public sealed record TextSourceSpan(TextSource Start, TextSource Stop);
-
-public interface IDefinition
-{
-	UInt64 Id { get; }
-	String Name { get; }
-	TextSourceSpan Location { get; }
-	IDefinition? Parent { get; }
-}
-
-public abstract class Definition
-{
-	public UInt64 Id { get; private set; }
-	public String Name { get; set; } = null!;
-}
-
-public abstract class SourceTextDefinition : Definition, IDefinition
-{
-	public TextSourceSpan Location { get; set; } = null!;
-	public IDefinition? Parent { get; set; }
-}
-
-public sealed class Package : Definition, IHasModules
-{	
-	public HashSet<Module> Modules { get; } = new();
-}
-
-public class Module : Definition, IHasTypes, IHasFunctions
-{
-	public HashSet<Type> Types { get; } = new();
-	public HashSet<Function> Functions { get; } = new();
-}
-
-public class Type : SourceTextDefinition, IHasTypes, IHasFunctions
-{
-	public Module Module { get; set; } = null!;
-	public HashSet<Type> Types { get; } = new();
-	public HashSet<Function> Functions { get; } = new();
-}
-
-public class Function : SourceTextDefinition, IHasStatements
-{
-	public Module Module { get; set; } = null!;
-	public HashSet<Statement> Statements { get; } = new();
-}
-
-public class Statement : SourceTextDefinition
-{
-	public new Function Parent { get; private set; } = null!;
-}
-
-public interface IHasModules { public HashSet<Module> Modules { get; } }
-public interface IHasTypes { public HashSet<Type> Types { get; } }
-public interface IHasFunctions { public HashSet<Function> Functions { get; } }
-public interface IHasStatements { public HashSet<Statement> Statements { get; } }
-//public interface IHasParent { public IDefinition Parent { get; } }
-//public interface IHasParent<TParent> : IHasParent where TParent : IDefinition
-//{
-//	public new TParent Parent { get; }
-//	IDefinition IHasParent.Parent => Parent;
-//}

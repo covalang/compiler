@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class OrderedSet<T> : ICollection<T> where T : notnull
+public class OrderedSet<T> : ICollection<T>// where T : notnull
 {
     private readonly IDictionary<T, LinkedListNode<T>> dictionary;
     private readonly LinkedList<T> linkedList;

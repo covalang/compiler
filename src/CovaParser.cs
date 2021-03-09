@@ -1,9 +1,8 @@
 ﻿using Compiler.DefinitionInterfaces;
-using Cova;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Compiler.Symbols;
+using Cova.Symbols;
 
 using static CovaParser;
 
@@ -24,11 +23,11 @@ public partial class CovaParser
 		//IReadOnlySet<IScope> IScopeBase.Imported => Imported;
 	}
 
-	public partial class NamespaceDefinitionContext : INamespaceDefinition
-	{
-		public IEnumerable<String> Names => qualifiedIdentifier().identifier().Select(x => x.GetText());
-		public Visibility Visibility => visibility().ToVisibilityEnum();
-	}
+	//public partial class NamespaceDefinitionContext : INamespaceDefinition
+	//{
+	//	public IEnumerable<String> Names => qualifiedIdentifier().identifier().Select(x => x.GetText());
+	//	public Visibility Visibility => visibility().ToVisibilityEnum();
+	//}
 }
 
 static class ParserExtensions

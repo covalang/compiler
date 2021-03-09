@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Compiler.Symbols
+namespace Cova.Symbols
 {
 	public abstract record DefinitionSource { private protected DefinitionSource() {} }
 	public sealed record TextSourceSpan(TextSourceLocation Begin, TextSourceLocation End) : DefinitionSource;

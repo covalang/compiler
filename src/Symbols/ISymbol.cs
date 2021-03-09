@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Immutable;
 
-namespace Compiler.Symbols
+namespace Cova.Symbols
 {
 	public enum Ownership : Byte { Unique, Shared }
 	public enum Visibility : Byte { None, Private, Protected, Internal, Public }
@@ -12,12 +11,12 @@ namespace Compiler.Symbols
 	public enum InstanceDependency : Byte { Value, Reference } // Independent, Interdependent
 	public enum ThreadShareability : Byte { Local, Global }
 
-	public interface ISymbol
+	public interface ISymbol : IHasParent<ISymbol>, IHasChildren<ISymbol>
 	{
-		DefinitionSource DefinitionSource { get; }
+		DefinitionSource DefinitionSource { get; set; }
 	}
 
-	public interface IScope
+	public interface IScope : ISymbol
 	{
 		OrderedSet<IScope> Children { get; set; }
 		OrderedSet<IScope> Imported { get; set; }
@@ -26,16 +25,15 @@ namespace Compiler.Symbols
 	}
 
 	public interface IStorageReferencing
-	{
-		Ownership Ownership { get; }
-		Visibility Visibility { get; }
-		Mutability Mutability { get; }
-		Nullability Nullability { get; }
-		StorageType StorageType { get; }
-		CyclePossibility CyclePossibility { get; }
-		InstanceDependency InstanceDependency { get; }
-		ThreadShareability ThreadShareability { get; }
-	}
+		: IHasOwnership
+		, IHasVisibility
+		, IHasMutability
+		, IHasNullability
+		, IHasStorageType
+		, IHasCyclePossibility
+		, IHasInstanceDependency
+		, IHasThreadShareability
+	{ }
 
 	public interface IAlias : IAlias<ISymbol> {}
 	public interface IAlias<out TSymbol> : ISymbol where TSymbol : ISymbol
@@ -52,11 +50,7 @@ namespace Compiler.Symbols
 	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements {}
 	public interface IGenericFunction : IFunction, IHasTypeParameters {}
 
-	public interface IType : ISymbol, IScope, IHasTypes, IHasFunctions, IHasFields, IHasProperties
-	{
-		OrderedSet<IInterface> Extends { get; }
-		OrderedSet<IType> Implements { get; }
-	}
+	public interface IType : ISymbol, IScope, IHasTypes, IHasFunctions, IHasFields, IHasProperties, IExtends, IImplements {}
 	public interface IGenericType : IType, IHasTypeParameters {}
 	
 	public interface IDelegate : IType {}
@@ -66,44 +60,48 @@ namespace Compiler.Symbols
 
 	public interface IProperty : ISymbol, IHasName
 	{
-		IFunction Getter { get; }
-		IFunction Setter { get; }
+		IFunction Getter { get; set; }
+		IFunction Setter { get; set; }
 	}
 	public interface IStatement : ISymbol {}
 
 	public interface IParameter : ISymbol, IHasName, IHasType {}
 	public interface ITypeParameter : IParameter {}
 	
-	public interface IInterface : ISymbol, IScope, IHasName {}
-	public interface ITrait : ISymbol, IScope, IHasName {}
-	public interface IStruct : IHasName, IType, IHasTypes, IHasFunctions {}
-	public interface IClass : IHasName, IType, IHasTypes, IHasFunctions {}
+	public interface IInterface : IType, IHasName {}
+	public interface ITrait : IType, IHasName {}
+	public interface IStruct : IType, IHasName {}
+	public interface IClass : IType, IHasName {}
 	
-	public interface IHasName { String Name { get; } }
-	public interface IHasType { IType Type { get; } }
-	public interface IHasOwnership { Ownership Ownership { get; } }
-	public interface IHasVisibility { Visibility Visibility { get; } }
-	public interface IHasMutability { Mutability Mutability { get; } }
-	public interface IHasNullability { Nullability Nullability { get; } }
-	public interface IHasStorageType { StorageType StorageType { get; } }
-	public interface IHasCyclePossibility { CyclePossibility CyclePossibility { get; } }
-	public interface IHasInstanceDependency { InstanceDependency InstanceDependency { get; } }
-	public interface IHasThreadShareability { ThreadShareability ThreadShareability { get; } }
+	public interface IHasParent<TParent> { TParent? Parent { get; set; } }
+	public interface IHasChildren<TChild> { OrderedSet<TChild> Children { get; set; } }
+
+	public interface IHasName { String Name { get; set; } }
+	public interface IHasType { IType Type { get; set; } }
+	public interface IHasOwnership { Ownership Ownership { get; set; } }
+	public interface IHasVisibility { Visibility Visibility { get; set; } }
+	public interface IHasMutability { Mutability Mutability { get; set; } }
+	public interface IHasNullability { Nullability Nullability { get; set; } }
+	public interface IHasStorageType { StorageType StorageType { get; set; } }
+	public interface IHasCyclePossibility { CyclePossibility CyclePossibility { get; set; } }
+	public interface IHasInstanceDependency { InstanceDependency InstanceDependency { get; set; } }
+	public interface IHasThreadShareability { ThreadShareability ThreadShareability { get; set; } }
 	
-	public interface IHasModules { OrderedSet<IModule> Modules { get; } }
-	public interface IHasScopes { OrderedSet<IScope> Scopes { get; } }
-	public interface IHasAliases { OrderedSet<IAlias> Aliases { get; } }
-	public interface IHasNamespaces { OrderedSet<INamespace> Namespaces { get; } }
-	public interface IHasTypes { OrderedSet<IType> Types { get; } }
-	public interface IHasInterfaces { OrderedSet<IType> Interfaces { get; } }
-	public interface IHasTraits { OrderedSet<IType> Traits { get; } }
-	public interface IHasFields { OrderedSet<IField> Fields { get; } }
-	public interface IHasProperties { OrderedSet<IProperty> Properties { get; } }
-	public interface IHasFunctions { OrderedSet<IFunction> Functions { get; } }
-	public interface IHasParameters { OrderedSet<IParameter> Parameters { get; } }
-	public interface IHasLocals { OrderedSet<ILocal> Locals { get; } }
-	public interface IHasStatements { OrderedSet<IStatement> Statements { get; } }
-	public interface IHasTypeParameters { OrderedSet<ITypeParameter> TypeParameters { get; } }
+	public interface IHasModules { OrderedSet<IModule> Modules { get; set; } }
+	public interface IHasScopes { OrderedSet<IScope> Scopes { get; set; } }
+	public interface IHasAliases { OrderedSet<IAlias> Aliases { get; set; } }
+	public interface IHasNamespaces { OrderedSet<INamespace> Namespaces { get; set; } }
+	public interface IHasTypes { OrderedSet<IType> Types { get; set; } }
+	public interface IHasInterfaces { OrderedSet<IType> Interfaces { get; set; } }
+	public interface IHasTraits { OrderedSet<IType> Traits { get; set; } }
+	public interface IHasFields { OrderedSet<IField> Fields { get; set; } }
+	public interface IHasProperties { OrderedSet<IProperty> Properties { get; set; } }
+	public interface IHasFunctions { OrderedSet<IFunction> Functions { get; set; } }
+	public interface IHasParameters { OrderedSet<IParameter> Parameters { get; set; } }
+	public interface IHasLocals { OrderedSet<ILocal> Locals { get; set; } }
+	public interface IHasStatements { OrderedSet<IStatement> Statements { get; set; } }
+	public interface IHasTypeParameters { OrderedSet<ITypeParameter> TypeParameters { get; set; } }
 	
-	public interface IExtends { OrderedSet<IType> BaseTypes { get; } }
+	public interface IExtends { OrderedSet<IType> Extends { get; set; } }
+	public interface IImplements { OrderedSet<IType> Implements { get; set; } }
 }

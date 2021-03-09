@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
-using Cova.Scopes;
+using Cova.Symbols;
 
 namespace Cova
 {
@@ -10,18 +10,16 @@ namespace Cova
 	{
 		private const Char QualifierDelimiter = '.';
 		
-		readonly FileScope fileScope;
-		readonly Module module;
+		readonly IModule module;
 		IScope scope;
 		Type? type;
-		Function? function;
+		IFunction? function;
 		IDefinition? definition;
 		
-		public CovaListener(FileScope fileScope, Module module)
+		public CovaListener(IModule module, IScope scope)
 		{
 			this.module = module;
-			this.fileScope = fileScope;
-			this.scope = fileScope;
+			this.scope = scope;
 		}
 
 		private readonly List<ParserRuleContext> qualifiers = new();
@@ -40,6 +38,9 @@ namespace Cova
 		public override void EnterNamespaceDefinition(CovaParser.NamespaceDefinitionContext context)
 		{
 			qualifiers.AddRange(context.qualifiedIdentifier().identifier());
+			var @namespace = InterfaceImplementor.Create<INamespace>();
+			@namespace.Name = context.qualifiedIdentifier
+			scope = @namespace;
 		}
 
 		public override void ExitNamespaceDefinition(CovaParser.NamespaceDefinitionContext context)

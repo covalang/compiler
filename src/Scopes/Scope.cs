@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Compiler.Symbols;
+using Cova.Symbols;
 
 namespace Cova.Scopes
 {

@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Cova.Definitions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cova
