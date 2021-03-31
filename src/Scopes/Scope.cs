@@ -22,18 +22,18 @@ namespace Cova.Scopes
 
 	sealed class AnonymousScope : Scope
 	{
-		public AnonymousScope(IScopeBase parent) : base(parent) { }
+		public AnonymousScope(ScopeBase parent) : base(parent) { }
 	}
 
 	abstract class NamedScope : Scope
 	{
 		public abstract String Name { get; protected set; }
-		public NamedScope(IScopeBase parent) : base(parent) { }
+		public NamedScope(ScopeBase parent) : base(parent) { }
 	}
 
 	sealed class FileScope : NamedScope
 	{
 		public override String Name { get; protected set; }
-		public FileScope(String name, IScopeBase parent) : base(parent) => Name = name;
+		public FileScope(String name, ScopeBase parent) : base(parent) => Name = name;
 	}
 }

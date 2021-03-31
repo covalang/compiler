@@ -2,8 +2,9 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<AssemblyName>cova</AssemblyName>
 		<TargetFramework>net5.0</TargetFramework>
+		<AssemblyName>cova</AssemblyName>
+		<RootNamespace>Cova</RootNamespace>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 

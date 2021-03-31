@@ -69,15 +69,15 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ identifier Whitespace+ storageType? Whitespace+ memberType (Whitespace+ visibility)?
+	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ memberType (Whitespace+ visibility)?
 	;
 
 propertyDefinition
-	: Prop Whitespace+ identifier Whitespace+ storageType? Whitespace+ memberType
+	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ memberType
 	;
 
 functionDefinition
-	: Func Whitespace+ identifier parameters? memberType? (Whitespace+ visibility)? body?
+	: Func Whitespace+ identifier parameters? (Whitespace+ memberType)? (Whitespace+ visibility)? body?
 	;
 
 parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
@@ -101,11 +101,11 @@ identifier
 
 
 visibility
-    : Minus #privateVisibility
-    | Octothorp #protectedVisibility
-    | Tilde #internalVisibility
-    | Plus #publicVisibility
-    ;
+	: Minus #privateVisibility
+	| Octothorp #protectedVisibility
+	| Tilde #internalVisibility
+	| Plus #publicVisibility
+	;
 
 //noVisibility: Underscore;
 //privateVisibility: Minus;
@@ -130,13 +130,16 @@ delegateTypeKind: Func;
 statement
 	: assignment
 	| invocation
-	| localDefinition
+	//| localDefinition
 	| localDeclaration
 	| expression
 	;
 
-localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
-localDeclaration: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ assignmentOperator anyWhitespace+ expression);
+//localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
+localDeclaration
+	: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)
+	| Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ assignmentOperator anyWhitespace+ expression)
+	;
 
 assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace* expression;
 

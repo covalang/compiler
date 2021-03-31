@@ -11,17 +11,11 @@ namespace Cova.Symbols
 	public enum InstanceDependency : Byte { Value, Reference } // Independent, Interdependent
 	public enum ThreadShareability : Byte { Local, Global }
 
-	public interface ISymbol : IHasParent<ISymbol>, IHasChildren<ISymbol>
-	{
-		DefinitionSource DefinitionSource { get; set; }
-	}
+	public interface ISymbol : IHasParent<ISymbol?>, IHasChildren<ISymbol>, IHasDefinitionSource {}
 
 	public interface IScope : ISymbol
 	{
-		OrderedSet<IScope> Children { get; set; }
 		OrderedSet<IScope> Imported { get; set; }
-		OrderedSet<ISymbol> Symbols { get; set; }
-		IScope? Parent { get; set; }
 	}
 
 	public interface IStorageReferencing
@@ -44,19 +38,20 @@ namespace Cova.Symbols
 	public interface ITypeAlias : IAlias<IType>, IHasName {}
 
 	public interface IPackage : ISymbol, IHasName, IHasModules {}
-	public interface IModule : ISymbol, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
+	public interface IModule : ISymbol, IScope, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
 	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasAliases, IHasTypes, IHasFunctions {}
 
 	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements {}
 	public interface IGenericFunction : IFunction, IHasTypeParameters {}
 
-	public interface IType : ISymbol, IScope, IHasTypes, IHasFunctions, IHasFields, IHasProperties, IExtends, IImplements {}
-	public interface IGenericType : IType, IHasTypeParameters {}
-	
+	public interface IType : ISymbol, IScope, IHasName, IHasTypeParameters, IHasTypes, IHasFunctions, IHasFields, IHasProperties {}
+	public interface ITypeReference : IType {}
+	public interface ITypeInference : IType {}
+
 	public interface IDelegate : IType {}
 
-	public interface ILocal : ISymbol, IHasName, IStorageReferencing {}
-	public interface IField : ISymbol, IHasName, IStorageReferencing {}
+	public interface ILocal : ISymbol, IHasName, IHasType, IStorageReferencing {}
+	public interface IField : ISymbol, IHasName, IHasType, IStorageReferencing {}
 
 	public interface IProperty : ISymbol, IHasName
 	{
@@ -67,14 +62,16 @@ namespace Cova.Symbols
 
 	public interface IParameter : ISymbol, IHasName, IHasType {}
 	public interface ITypeParameter : IParameter {}
+
+	//public interface INamedType : IType, IHasName {}
+	public interface ITrait : IType {}
+	public interface IStruct : IType, IExtends<IStruct>, IImplements<ITrait> {}
+	public interface IInterface : IType {}
+	public interface IClass : IType, IExtends<IClass>, IImplements<IInterface> {}
 	
-	public interface IInterface : IType, IHasName {}
-	public interface ITrait : IType, IHasName {}
-	public interface IStruct : IType, IHasName {}
-	public interface IClass : IType, IHasName {}
-	
-	public interface IHasParent<TParent> { TParent? Parent { get; set; } }
+	public interface IHasParent<TParent> { TParent Parent { get; set; } }
 	public interface IHasChildren<TChild> { OrderedSet<TChild> Children { get; set; } }
+	public interface IHasDefinitionSource { DefinitionSource DefinitionSource { get; set; } }
 
 	public interface IHasName { String Name { get; set; } }
 	public interface IHasType { IType Type { get; set; } }
@@ -102,6 +99,6 @@ namespace Cova.Symbols
 	public interface IHasStatements { OrderedSet<IStatement> Statements { get; set; } }
 	public interface IHasTypeParameters { OrderedSet<ITypeParameter> TypeParameters { get; set; } }
 	
-	public interface IExtends { OrderedSet<IType> Extends { get; set; } }
-	public interface IImplements { OrderedSet<IType> Implements { get; set; } }
+	public interface IExtends<TType> where TType : IType { OrderedSet<IType> Extends { get; set; } }
+	public interface IImplements<TType> where TType : IType { OrderedSet<IType> Implements { get; set; } }
 }

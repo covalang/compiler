@@ -1,8 +1,10 @@
 ﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using Compiler.Symbols;
 using Cova.Scopes;
+using Cova.Symbols;
 using LLVMSharp.Interop;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +23,7 @@ namespace Cova
 	class Program
 	{
 
-		static Task Main(String[] args)
+		static void Main(String[] args)
 		{
 			//var result =
 			//	CommandLine
@@ -33,7 +35,7 @@ namespace Cova
 			//			errors => Console.WriteLine(String.Join(Environment.NewLine, errors))
 			//		);
 			
-			return Host.CreateDefaultBuilder().RunConsoleAsync();
+			//return Host.CreateDefaultBuilder().RunConsoleAsync();
 
 			var filename = "Test.cova";
 			var filePath = File.Exists(filename) ? filename : "../../../" + filename;
@@ -74,26 +76,32 @@ namespace Cova
 			// return;
 
 			var commonTokenStream = new CommonTokenStream(lexer);
-			var parser = new CovaParser(commonTokenStream);
-			var package = new Package { Name = "Cova" };
+			var parser = new CovaParser(commonTokenStream);// { BuildParseTree = false };
+			parser.Interpreter.PredictionMode = PredictionMode.SLL;
+			//var package = new Package { Name = "Cova" };
 
 			//using var llvmInitializer = new LLVMInitializer();
 			//using var module = LLVMModuleRef.CreateWithName("NativeBinary");
 			//var builder = module.Context.CreateBuilder();
 
-			//using var connection = new SqliteConnection("Data Source=:memory:");
-			using var connection = new SqliteConnection("Data Source=Sharable;Mode=Memory;Cache=Shared");
-			connection.Open();
-			using var context = new Context(connection);
-			context.Database.EnsureDeleted();
-			context.Database.EnsureCreated();
-			context.Database.ExecuteSqlRaw("pragma auto_vacuum = full;");
-			var funcs = context.Functions.ToList();
+			////using var connection = new SqliteConnection("Data Source=:memory:");
+			//using var connection = new SqliteConnection("Data Source=Sharable;Mode=Memory;Cache=Shared");
+			//connection.Open();
+			//using var context = new Context(connection);
+			//context.Database.EnsureDeleted();
+			//context.Database.EnsureCreated();
+			//context.Database.ExecuteSqlRaw("pragma auto_vacuum = full;");
+			//var funcs = context.Functions.ToList();
 
-			var rootScope = new RootScope();
-			var fileScope = new FileScope(filename, rootScope);
-			var listener = new CovaListener(fileScope, new Module());
-			ParseTreeWalker.Default.Walk(listener, parser.file());
+			//var rootScope = new RootScope();
+			//var fileScope = new FileScope(filename, rootScope);
+			var rootSymbol = InterfaceImplementor.CreateAndInitialize<IModule>();
+			rootSymbol.Name = "Module";
+			var symReg = new SymbolRegistrationVisitor(rootSymbol);
+			symReg.Visit(parser.file());
+			//var symbolReg = new SymbolRegistrationListener(rootSymbol);
+			//ParseTreeWalker.Default.Walk(symbolReg, parser.file());
+			var symbolRes = new SymbolResolutionListener(rootSymbol);
 		}
 	}
 

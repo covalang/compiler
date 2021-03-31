@@ -129,7 +129,8 @@ Intersection: '∩';
 // Lexical rules
 
 Identifier
-	: [_A-Za-z][_A-Za-z0-9-]*
+	: [\p{ID_Start}][\p{ID_Continue}\p{Dash_Punctuation}]*
+	//: [_A-Za-z][_A-Za-z0-9\-]*
 	//: IdentifierStartCharacter IdentifierPartCharacter*
 	;
 
@@ -169,4 +170,6 @@ RightBrace: '}';
 
 Newline: '\r\n' | '\r' | '\n';
 Tab: '\t';
-Whitespace: [\p{Z}];
+Whitespace: [\p{White_Space}];
+Comment: '///' .*? Newline -> skip;
+MultilineComment: '/*' .*? '*/' -> skip;

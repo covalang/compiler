@@ -1,5 +1,10 @@
-namespace Foo1.Foo2
-	namespace Foo3.Foo4
+namespace System.Things
+	type Foo
+		field count U32
+		prop text String
 		func Bar
 			local x = 1 + 2
-Foo.Bar()
+			local y = x
+func Baz
+	local foo Foo
+	foo.count = 1

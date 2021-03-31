@@ -18,7 +18,7 @@ namespace DemoLanguageServer
 {
     static class Program
     {
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             var debugMode = args.Any(a => a.Equals("--debug", StringComparison.OrdinalIgnoreCase));
 #if WAIT_FOR_DEBUGGER
