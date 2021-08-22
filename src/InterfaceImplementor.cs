@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -104,6 +105,11 @@ namespace Cova
 						fieldName: $"<{property.Name}>k__BackingField",
 						type: property.PropertyType,
 						attributes: FieldAttributes.Private);
+					fieldBuilder.SetCustomAttribute(
+						new CustomAttributeBuilder(
+							typeof(DebuggerBrowsableAttribute).GetConstructor(new [] { typeof(DebuggerBrowsableState) })!, new Object[] { DebuggerBrowsableState.Never }
+						)
+					);
 
 					var getterBuilder = typeBuilder.DefineMethod(
 						name: property.GetMethod?.Name ?? throw new Exception("Getter must be defined."),
