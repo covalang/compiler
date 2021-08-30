@@ -9,10 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include=".antlr/*.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="Antlr4BuildTasks" Version="8.14.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
 		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.0" />
 		<PackageReference Include="LLVMSharp" Version="10.0.0-beta" />
@@ -23,7 +20,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include=".antlr\" />
+		<Antlr4 Include="CovaLexer.g4" />
+		<Antlr4 Include="CovaParser.g4" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Folder Include="LanguageServer\" />
 	</ItemGroup>
 
