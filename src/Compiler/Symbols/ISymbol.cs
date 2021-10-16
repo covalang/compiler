@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Cova.Symbols
 {
@@ -41,10 +42,10 @@ namespace Cova.Symbols
 	public interface IModule : ISymbol, IScope, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
 	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasAliases, IHasTypes, IHasFunctions {}
 
-	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements {}
+	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements, IStorageReferencing { }
 	public interface IGenericFunction : IFunction, IHasTypeParameters {}
 
-	public interface IType : ISymbol, IScope, IHasName, IHasTypeParameters, IHasTypes, IHasFunctions, IHasFields, IHasProperties {}
+	public interface IType : ISymbol, IScope, IHasName, IHasTypeParameters, IHasTypes, IHasFunctions, IHasFields, IHasProperties, IStorageReferencing { }
 	public interface ITypeReference : IType {}
 	public interface ITypeInference : IType {}
 

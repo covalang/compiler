@@ -6,6 +6,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Cova
 {
@@ -26,8 +28,13 @@ namespace Cova
 			BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
 		private const MethodAttributes PropertyAccessorMethodAttributes =
-			MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig |
-			MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+			MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+
+		public class Base
+		{
+			private static readonly JsonSerializerOptions Options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+			public override String ToString() => GetType().Name + ": " + JsonSerializer.Serialize((Object) this, Options);
+		}
 
 		private static Boolean HasVirtualMethods(this Type type)
 		{
@@ -81,7 +88,8 @@ namespace Cova
 
 				var typeBuilder = ModuleBuilder.DefineType(
 					name: $"<{typeof(TInterface).Name}>",
-					attr: TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Sealed);
+					attr: TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Sealed,
+					parent: typeof(Base));
 				typeBuilder.AddInterfaceImplementation(typeof(TInterface));
 				var constructorBuilder = typeBuilder.DefineDefaultConstructor(MethodAttributes.Family);
 

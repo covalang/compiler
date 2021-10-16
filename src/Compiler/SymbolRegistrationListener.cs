@@ -18,6 +18,8 @@ namespace Cova
 
 		public SymbolRegistrationListener(ISymbol rootSymbol) => symbol = rootSymbol;
 
+		//public override void EnterEveryRule([NotNull] ParserRuleContext context) => 
+
 		private readonly List<ParserRuleContext> qualifiers = new();
 		private String CurrentQualifier => String.Join(QualifierDelimiter, CurrentQualifiers.Select(x => x.GetText()));
 

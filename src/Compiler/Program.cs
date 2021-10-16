@@ -34,7 +34,7 @@ namespace Cova
 			//			(Commands.Serve serve) => serve.Debug,
 			//			errors => Console.WriteLine(String.Join(Environment.NewLine, errors))
 			//		);
-			
+
 			//return Host.CreateDefaultBuilder().RunConsoleAsync();
 
 			var filename = "Test.cova";
