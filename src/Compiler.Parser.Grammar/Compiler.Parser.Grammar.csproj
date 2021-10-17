@@ -9,5 +9,14 @@
         <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.2"/>
         <PackageReference Include="Antlr4BuildTasks" Version="8.16.0"/>
     </ItemGroup>
+	
+	<ItemGroup>
+        <Antlr4 Include="CovaLexer.g4">
+            <Package>Cova.Compiler.Parser.Grammar</Package>
+        </Antlr4>
+        <Antlr4 Include="CovaParser.g4">
+            <Package>Cova.Compiler.Parser.Grammar</Package>
+        </Antlr4>
+    </ItemGroup>
 
 </Project>

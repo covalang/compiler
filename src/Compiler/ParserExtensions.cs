@@ -1,7 +1,7 @@
 ﻿using System;
 using Cova.Symbols;
 
-using static CovaParser;
+using static Cova.Compiler.Parser.Grammar.CovaParser;
 
 static class ParserExtensions
 {

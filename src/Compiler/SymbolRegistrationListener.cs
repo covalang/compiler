@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using Cova.Compiler.Parser.Grammar;
 using Cova.Symbols;
 
-using static CovaParser;
+using static Cova.Compiler.Parser.Grammar.CovaParser;
 
 namespace Cova
 {

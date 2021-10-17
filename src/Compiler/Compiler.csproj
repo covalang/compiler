@@ -23,4 +23,8 @@
 	  <Folder Include="LanguageServer\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\Compiler.Parser\Compiler.Parser.csproj" />
+	</ItemGroup>
+
 </Project>

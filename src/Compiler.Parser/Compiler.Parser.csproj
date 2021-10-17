@@ -2,6 +2,11 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>Cova.Compiler.Parser</RootNamespace>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Compiler.Parser.Grammar\Compiler.Parser.Grammar.csproj" />
+    </ItemGroup>
 
 </Project>

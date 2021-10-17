@@ -3,6 +3,8 @@ using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using Compiler.Symbols;
+using Cova.Compiler.Parser;
+using Cova.Compiler.Parser.Grammar;
 using Cova.Scopes;
 using Cova.Symbols;
 using LLVMSharp.Interop;
@@ -22,8 +24,25 @@ namespace Cova
 {
 	class Program
 	{
-
 		static void Main(String[] args)
+		{
+			var filename = "Test.cova";
+			var filePath = File.Exists(filename) ? filename : "../../../" + filename;
+			var fileContents = File.ReadAllText(filePath);
+
+			var parser = new CovaParserExtended(fileContents, filename);
+			parser.Interpreter.PredictionMode = PredictionMode.SLL;
+			var file = parser.file();
+
+			var rootSymbol = InterfaceImplementor.CreateAndInitialize<IModule>();
+			rootSymbol.Name = "Module";
+			rootSymbol.DefinitionSource = file.ToTextSourceSpan();
+
+			var symReg = new SymbolRegistrationVisitor(rootSymbol);
+			symReg.Visit(file);
+		}
+
+		static void Main2(String[] args)
 		{
 			//var result =
 			//	CommandLine

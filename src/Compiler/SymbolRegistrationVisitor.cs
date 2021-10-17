@@ -1,8 +1,9 @@
 ﻿using Antlr4.Runtime.Misc;
+using Cova.Compiler.Parser.Grammar;
 using Cova.Symbols;
 using System;
 
-using static CovaParser;
+using static Cova.Compiler.Parser.Grammar.CovaParser;
 
 namespace Cova
 {

@@ -71,11 +71,10 @@ public sealed class LinearHelper
 	}
 
 	private CommonToken CreateToken() =>
-		new CommonToken(linearBodyEnd.tokenType, linearBodyEnd.name)
+		new(currentToken)
 		{
-			Line = currentToken!.Line,
-			Column = currentToken.Column,
-			StartIndex = currentToken.StopIndex,
-			StopIndex = currentToken.StopIndex
+			Type = linearBodyEnd.tokenType,
+			Text = linearBodyEnd.name,
+			StopIndex = currentToken.StartIndex
 		};
 }

@@ -105,11 +105,10 @@ public sealed class DentHelper
 	}
 
 	private CommonToken CreateToken(Int32 type, String displayText) =>
-		new CommonToken(type, displayText)
+		new(currentToken)
 		{
-			Line = currentToken!.Line,
-			Column = currentToken.Column,
-			StartIndex = currentToken.StopIndex,
-			StopIndex = currentToken.StopIndex
+			Type = type,
+			Text = displayText,
+			StopIndex = currentToken.StartIndex
 		};
 }

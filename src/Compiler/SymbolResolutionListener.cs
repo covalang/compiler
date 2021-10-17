@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using Cova.Compiler.Parser.Grammar;
 using Cova.Symbols;
 
 namespace Cova
@@ -14,7 +15,7 @@ namespace Cova
 
         public override void EnterEveryRule([NotNull] ParserRuleContext context)
         {
-            stack.Push(context)
+            stack.Push(context);
         }
 
         public override void ExitEveryRule([NotNull] ParserRuleContext context)
