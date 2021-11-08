@@ -47,7 +47,7 @@ namespaceBody
 	;
 
 typeDefinition
-	: Type Whitespace+ (typeKind Whitespace+)? identifier (Whitespace+ visibility)? typeBody?
+	: Type Whitespace+ (typeKind Whitespace+)? identifier typeParameters? (Whitespace+ visibility)? typeBody?
 	;
 
 typeBody
@@ -64,21 +64,27 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ memberType (Whitespace+ visibility)?
+	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ type (Whitespace+ visibility)?
 	;
 
 propertyDefinition
-	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ memberType
+	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ type
 	;
 
 functionDefinition
-	: Func Whitespace+ identifier parameters? (Whitespace+ memberType)? (Whitespace+ visibility)? body?
+	: Func Whitespace+ identifier typeParameters? parameters? (Whitespace+ type)? (Whitespace+ visibility)? body?
 	;
 
-parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
-parameter: identifier (Whitespace+ qualifiedIdentifier)?;
+typeParameters: LeftChevron typeParameter (Comma Whitespace+ typeParameter)* RightChevron;
+typeParameter: type (Whitespace+ Colon Whitespace+ type)?;
 
-memberType: qualifiedIdentifier;
+typeArguments: LeftChevron typeArgument (Comma Whitespace+ typeArgument)* RightChevron;
+typeArgument: type;
+
+parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
+parameter: identifier (Whitespace+ type)?;
+
+type: qualifiedIdentifier typeArguments?;
 
 body
 	: dentedBodyBegin (statement | dentedBodyContinue)* dentedBodyEnd
@@ -132,8 +138,8 @@ statement
 
 //localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
 localDeclaration
-	: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)
-	| Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier)? (Whitespace+ assignmentOperator anyWhitespace+ expression)
+	: Local Whitespace+ identifier (Whitespace+ type)
+	| Local Whitespace+ identifier (Whitespace+ type)? (Whitespace+ assignmentOperator anyWhitespace+ expression)
 	;
 
 assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace* expression;
@@ -141,7 +147,6 @@ assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace* expr
 assignmentOperator: Equals;
 
 invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
-	arguments: expression (Comma expression)*;
 
 
 // Expressions
@@ -149,6 +154,8 @@ invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
 // identityExpression
 // 	: unaryExpression identityOperator unaryExpression
 // 	;
+
+memberAccessOperator: Whitespace Dot;
 
 identityOperator: isOperator | isntOperator;
 isOperator: Is;
@@ -210,7 +217,7 @@ multiplicationOperator: Asterisk;
 divisionOperator: Slash;
 moduloOperator: Percent;
 powerOperator: Asterisk Asterisk;
-rootOperator: Percent Percent;//Backslash Slash;
+rootOperator: Slash Slash;//Percent Percent;//Backslash Slash;
 
 relationalOperator
 	: equalityOperator
@@ -257,15 +264,25 @@ mapOperator: Map;
 foldOperator: Fold;
 joinOperator: Join;
 
+nameOfOperator: NameOf;
+funcOfOperator: FuncOf;
+fieldOfOperator: FieldOf;
+propOfOperator: PropOf;
+
 unaryOperator
 	: notOperator
 	| bitwiseNotOperator
 	| subtractionOperator
 	| rootOperator
+	| nameOfOperator Whitespace
+	| funcOfOperator Whitespace
+	| fieldOfOperator Whitespace
+	| propOfOperator Whitespace
 	;
 
 binaryOperator
-	: identityOperator
+	: memberAccessOperator
+	| identityOperator
 	| logicalOperator
 	| bitwiseOperator
 	| arithmeticOperator
@@ -280,8 +297,9 @@ binaryOperator
 	;
 
 expression
-	: LeftParenthesis Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightParenthesis  #parenthesisExpression
-	| LeftBracket Whitespace* expression (Comma Whitespace+ expression)? Whitespace* RightBracket          #bracketExpression
+	: LeftParenthesis Whitespace* arguments Whitespace* RightParenthesis                                   #parenthesisExpression
+	| LeftBracket anyWhitespace? arguments anyWhitespace? RightBracket                                     #bracketExpression
+	| expression LeftParenthesis arguments? RightParenthesis                                               #invocationExpression
 	| (parameter | parameters) body                                                                        #closureExpression
 	| unaryOperator expression                                                                             #unaryExpression
 	| expression Whitespace* binaryOperator Whitespace* expression                                         #binaryExpression
@@ -301,6 +319,8 @@ expression
 	// | expression Whitespace* ProperSuperset Whitespace* expression                                         #properSupersetExpression
 	| atom                                                                                                 #atomExpression
 	;
+	
+arguments: expression (Comma anyWhitespace? expression)*;
 
 arrayExpression
 	: LeftBracket expression (Comma expression)* RightBracket

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Cova.Compiler.Parser
 {
-    public class CovaLexerExtended : Grammar.CovaLexer
+    public sealed class CovaLexerExtended : Grammar.CovaLexer
     {
         public CovaLexerExtended(ICharStream input) : base(input) { }
         public CovaLexerExtended(ICharStream input, TextWriter output, TextWriter errorOutput) : base(input, output, errorOutput) { }

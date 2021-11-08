@@ -12,6 +12,11 @@ namespace Cova.Symbols
 	public enum InstanceDependency : Byte { Value, Reference } // Independent, Interdependent
 	public enum ThreadShareability : Byte { Local, Global }
 
+	public class Reference<T> where T : ISymbol, IHasName
+	{
+		//public Reference
+	}
+
 	public interface ISymbol : IHasParent<ISymbol?>, IHasChildren<ISymbol>, IHasDefinitionSource {}
 
 	public interface IScope : ISymbol
@@ -42,7 +47,7 @@ namespace Cova.Symbols
 	public interface IModule : ISymbol, IScope, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
 	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasAliases, IHasTypes, IHasFunctions {}
 
-	public interface IFunction : ISymbol, IScope, IHasName, IHasType, IHasParameters, IHasLocals, IHasStatements, IStorageReferencing { }
+	public interface IFunction : ISymbol, IScope, IHasName, IHasTypeReference, IHasParameters, IHasLocals, IHasStatements, IStorageReferencing { }
 	public interface IGenericFunction : IFunction, IHasTypeParameters {}
 
 	public interface IType : ISymbol, IScope, IHasName, IHasTypeParameters, IHasTypes, IHasFunctions, IHasFields, IHasProperties, IStorageReferencing { }
@@ -51,8 +56,8 @@ namespace Cova.Symbols
 
 	public interface IDelegate : IType {}
 
-	public interface ILocal : ISymbol, IHasName, IHasType, IStorageReferencing {}
-	public interface IField : ISymbol, IHasName, IHasType, IStorageReferencing {}
+	public interface ILocal : ISymbol, IHasName, IHasTypeReference, IStorageReferencing {}
+	public interface IField : ISymbol, IHasName, IHasTypeReference, IStorageReferencing {}
 
 	public interface IProperty : ISymbol, IHasName
 	{
@@ -61,7 +66,7 @@ namespace Cova.Symbols
 	}
 	public interface IStatement : ISymbol {}
 
-	public interface IParameter : ISymbol, IHasName, IHasType {}
+	public interface IParameter : ISymbol, IHasName, IHasTypeReference, IStorageReferencing {}
 	public interface ITypeParameter : IParameter {}
 
 	//public interface INamedType : IType, IHasName {}
@@ -75,7 +80,7 @@ namespace Cova.Symbols
 	public interface IHasDefinitionSource { DefinitionSource DefinitionSource { get; set; } }
 
 	public interface IHasName { String Name { get; set; } }
-	public interface IHasType { IType Type { get; set; } }
+	public interface IHasTypeReference { Reference<IType> TypeReference { get; set; } }
 	public interface IHasOwnership { Ownership Ownership { get; set; } }
 	public interface IHasVisibility { Visibility Visibility { get; set; } }
 	public interface IHasMutability { Mutability Mutability { get; set; } }

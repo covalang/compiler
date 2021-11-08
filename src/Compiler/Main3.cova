@@ -14,7 +14,7 @@ namespace Foo
 					[7, "ned", "flanders"]
 				]
 
-			rows for row -> row map .to-string map x { ',' >< x then { '"' + x + '"' } else x } join ',' for Env.writeLine
+			rows for row -> row map .to-string map x { ',' >< x then () '"' + x + '"' ) else x } join ',' for Env.writeLine
 			
 			local a = [1.22 .. 2.34 : 0.01]
 			local b = [a..b:c]

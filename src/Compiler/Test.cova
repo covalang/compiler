@@ -2,9 +2,9 @@ namespace System.Things
 	type Foo
 		field count U32
 		prop text String
-		func Bar
+		func Bar(a I32, b String)
 			local x = 1 + 2
 			local y = x
-func Baz
-	local foo Foo
+func Baz<T>
+	local foo Foo<T>
 	foo.count = 1

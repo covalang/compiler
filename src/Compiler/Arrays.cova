@@ -14,7 +14,7 @@ let reversed = nums[^]
 let first = nums[0]// for n get 1
 let last = nums[^1] for n get ^1
 
-let min = nums map .min
+func min(nums []Int) -> nums fold (a, n) -> a < c then a else c
 
 let isTwoInRange = 2 >< nums
 

@@ -25,6 +25,11 @@ Map: 'map';
 Fold: 'fold';
 Join: 'join';
 
+NameOf: 'name-of';
+FuncOf: 'func-of';
+FieldOf: 'field-of';
+PropOf: 'prop-of';
+
 // Storage types
 
 StaticStorageType : '$';
@@ -41,8 +46,8 @@ Not: 'not' | '¬';
 
 // Equality
 
-Equal: '==';
-NotEqual: '!=';
+//Equal: '==';
+//NotEqual: '!=';
 
 // Relational
 
