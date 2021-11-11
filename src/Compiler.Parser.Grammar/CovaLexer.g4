@@ -7,6 +7,7 @@ tokens { Indent, Dent, Dedent, LinearBodyEnd }
 Use: 'use';
 Namespace: 'namespace';
 
+Scope: 'scope';
 Type: 'type';
 Enum: 'enum';
 Class: 'class';

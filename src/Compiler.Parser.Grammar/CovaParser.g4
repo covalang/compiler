@@ -91,6 +91,8 @@ body
 	| bracedBodyBegin (statement | bracedBodyContinue)* bracedBodyEnd
 	| linearBodyBegin (statement | linearBodyContinue)* linearBodyEnd
 	;
+	
+scope: Scope anyWhitespace? body;
 
 qualifiedIdentifier
 	: identifier (Dot identifier)*
@@ -129,7 +131,8 @@ traitTypeKind: Trait;
 delegateTypeKind: Func;
 
 statement
-	: assignment
+	: scope
+	| assignment
 	| invocation
 	//| localDefinition
 	| localDeclaration
