@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public class Package : Symbol
+    public sealed class Package : Symbol
     {
-        protected Package() {}
+        private Package() {}
         public Package(DefinitionSource definitionSource, String name) : base(definitionSource) {}
         public String Name { get; set; } = null!;
         public List<Module> Modules { get; } = new();

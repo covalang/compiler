@@ -1,8 +1,8 @@
 namespace Cova.Model
 {
-    public class TypeParameter : Symbol
+    public sealed class TypeParameter : Symbol
     {
-        protected TypeParameter() {}
+        private TypeParameter() {}
 
         public TypeParameter(DefinitionSource definitionSource, TypeReference typeReference) : base(definitionSource) =>
             TypeReference = typeReference;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public class Symbol : EntityBase
+    public abstract class Symbol : EntityBase
     {
         protected Symbol() {}
         public Symbol(DefinitionSource definitionSource) => DefinitionSource = definitionSource;

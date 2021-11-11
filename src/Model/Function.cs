@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public class Function : NamedScope
+    public sealed class Function : NamedScope
     {
-        protected Function() {}
+        private Function() {}
         public Function(DefinitionSource definitionSource, String name, String typeReference) : base(definitionSource, name) => TypeReference = typeReference;
 
         public String TypeReference { get; set; } = null!;

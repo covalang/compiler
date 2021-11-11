@@ -2,9 +2,9 @@ using System;
 
 namespace Cova.Model
 {
-    public class Property : Symbol
+    public sealed class Property : Symbol
     {
-        protected Property() {}
+        private Property() {}
         public Property(DefinitionSource definitionSource, String name) : base(definitionSource) => Name = name;
 
         public String Name { get; set; } = null!;

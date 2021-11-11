@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public class Module : NamedScope
+    public sealed class Module : NamedScope
     {
-        protected Module() {}
+        private Module() {}
         public Module(DefinitionSource definitionSource, String name) : base(definitionSource, name) {}
         
         public List<Type> Types { get; } = new();

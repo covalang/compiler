@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public class Namespace : NamedScope
+    public sealed class Namespace : NamedScope
     {
-        protected Namespace() {}
+        private Namespace() {}
         public Namespace(DefinitionSource definitionSource, String name) : base(definitionSource, name) { }
         public List<Namespace> Namespaces { get; } = new();
         public List<Alias> Aliases { get; } = new();

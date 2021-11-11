@@ -1,12 +1,18 @@
 using System;
-using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public sealed class Type : NamedScope
+    public sealed class Parameter : Symbol
     {
-        private Type() {}
-        public Type(DefinitionSource definitionSource, String name) : base(definitionSource, name) {}
+        private Parameter() {}
+        public Parameter(DefinitionSource definitionSource, String name, TypeReference typeReference) : base(definitionSource)
+        {
+            Name = name;
+            TypeReference = typeReference;
+        }
+
+        public String Name { get; set; } = null!;
+        public TypeReference TypeReference { get; set; } = null!;
         public Ownership Ownership { get; set; }
         public Visibility Visibility { get; set; }
         public Mutability Mutability { get; set; }
@@ -15,11 +21,5 @@ namespace Cova.Model
         public CyclePossibility CyclePossibility { get; set; }
         public InstanceDependency InstanceDependency { get; set; }
         public ThreadShareability ThreadShareability { get; set; }
-
-        public List<TypeParameter> TypeParameters { get; } = new();
-        public List<Type> Types { get; } = new();
-        public List<Function> Functions { get; } = new();
-        public List<Field> Fields { get; } = new();
-        public List<Property> Properties { get; } = new();
     }
 }

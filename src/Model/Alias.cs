@@ -1,8 +1,8 @@
 ﻿namespace Cova.Model
 {
-    public class Alias : Alias<Symbol>
+    public sealed class Alias : Alias<Symbol>
     {
-        protected Alias() {}
+        private Alias() {}
         public Alias(DefinitionSource definitionSource, Symbol aliased) : base(definitionSource, aliased) {}
     }
 }
