@@ -2,19 +2,19 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>cova</AssemblyName>
 		<RootNamespace>Cova</RootNamespace>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Antlr4BuildTasks" Version="8.16.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.2" />
+		<PackageReference Include="Antlr4BuildTasks" Version="8.17.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3" />
 		<PackageReference Include="LLVMSharp" Version="10.0.0-beta" />
 		<PackageReference Include="ClangSharp" Version="10.0.0-beta" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
 		<PackageReference Include="CXuesong.LanguageServer.VsCode" Version="0.3.5" />
 		<PackageReference Include="CXuesong.JsonRpc.Streams" Version="0.5.4" />
 	</ItemGroup>
