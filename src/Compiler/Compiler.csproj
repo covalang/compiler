@@ -25,6 +25,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Compiler.Parser\Compiler.Parser.csproj" />
+	  <ProjectReference Include="..\Model\Model.csproj" />
 	</ItemGroup>
 
 </Project>

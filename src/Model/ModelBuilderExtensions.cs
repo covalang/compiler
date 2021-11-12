@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Cova
 {
@@ -15,6 +16,12 @@ namespace Cova
 
 			foreach (var (entityType, name) in entitySets)
 				modelBuilder.Entity(entityType).ToTable(name);
+		}
+		
+		public static void RemovePluralizingTableNameConvention(this ModelBuilder modelBuilder)
+		{
+			foreach (var entity in modelBuilder.Model.GetEntityTypes())
+				entity.SetTableName(entity.DisplayName());
 		}
 	}
 }
