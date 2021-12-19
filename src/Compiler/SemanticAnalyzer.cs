@@ -1,6 +1,6 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using Compiler.Symbols;
+//using Compiler.Symbols;
 using System;
 using System.Linq;
 
@@ -10,8 +10,8 @@ namespace Cova
 	{
 		//readonly RootScope rootScope = new();
 		Func<ParserRuleContext, Boolean>? NamedScopePredicate { get; set; } = x => x.GetType().Name == "NamespaceDefinitionContext";
-		Func<ParserRuleContext, Boolean> AnonymousScopePredicate { get; set; }// = x => x.GetType().Name == "NamespaceDefinitionContext";
-		Func<ParserRuleContext, Boolean> AliasPredicate { get; set; }
+		//Func<ParserRuleContext, Boolean> AnonymousScopePredicate { get; set; }// = x => x.GetType().Name == "NamespaceDefinitionContext";
+		//Func<ParserRuleContext, Boolean> AliasPredicate { get; set; }
 
 		public void EnterEveryRule(ParserRuleContext ctx)
 		{

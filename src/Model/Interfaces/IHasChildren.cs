@@ -2,5 +2,5 @@
 
 namespace Cova.Model
 {
-    public interface IHasChildren<TChild> { List<TChild> Children { get; } }
+    public interface IHasChildren<TChild> { ICollection<TChild> Children { get; } }
 }

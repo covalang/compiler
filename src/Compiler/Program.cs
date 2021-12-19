@@ -6,7 +6,6 @@ using Antlr4.Runtime.Tree;
 using Cova.Compiler.Parser;
 using Cova.Compiler.Parser.Grammar;
 using Cova.Scopes;
-using Cova.Symbols;
 using LLVMSharp.Interop;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Cova.Model;
+using IModule = Cova.Symbols.IModule;
 
-[assembly: CLSCompliant(false)]
+//[assembly: CLSCompliant(false)]
 
 namespace Cova
 {
@@ -32,15 +33,39 @@ namespace Cova
 
 			var parser = new CovaParserExtended(fileContents, filename);
 			parser.Interpreter.PredictionMode = PredictionMode.SLL;
-			var file = parser.file();
+			parser.BuildParseTree = false;
+			var file = parser.compilationUnit();
+			//var module = ParserToModelTransformer.Process(file);
 
-			var rootSymbol = InterfaceImplementor.CreateAndInitialize<IModule>();
-			rootSymbol.Name = "Module";
-			rootSymbol.DefinitionSource = file.ToTextSourceSpan();
+			var module = new Module(file.ToDefinitionSource(), "Module");
 
-			var symReg = new SymbolRegistrationVisitor(rootSymbol);
-			symReg.Visit(file);
+			const String dbFilename = "test.db";
+			using var connection = new SqliteConnection($"Data Source={dbFilename}");
+			connection.Open();
+			using var context = new Context(connection);
+			context.Database.EnsureCreated();
+			context.Database.ExecuteSqlRaw("pragma auto_vacuum = full;");
+			//var symReg = new ModelRegistrationVisitor(module, context);
+			//symReg.Visit(file);
 		}
+		
+		// static void Main3(String[] args)
+		// {
+		// 	var filename = "Test.cova";
+		// 	var filePath = File.Exists(filename) ? filename : "../../../" + filename;
+		// 	var fileContents = File.ReadAllText(filePath);
+		//
+		// 	var parser = new CovaParserExtended(fileContents, filename);
+		// 	parser.Interpreter.PredictionMode = PredictionMode.SLL;
+		// 	var file = parser.file();
+		//
+		// 	var rootSymbol = InterfaceImplementor.CreateAndInitialize<IModule>();
+		// 	rootSymbol.Name = "Module";
+		// 	rootSymbol.DefinitionSource = file.ToTextSourceSpan();
+		//
+		// 	var symReg = new SymbolRegistrationVisitor(rootSymbol);
+		// 	symReg.Visit(file);
+		// }
 
 		static void Main2(String[] args)
 		{
@@ -116,8 +141,8 @@ namespace Cova
 			//var fileScope = new FileScope(filename, rootScope);
 			var rootSymbol = InterfaceImplementor.CreateAndInitialize<IModule>();
 			rootSymbol.Name = "Module";
-			var symReg = new SymbolRegistrationVisitor(rootSymbol);
-			symReg.Visit(parser.file());
+			//var symReg = new SymbolRegistrationVisitor(rootSymbol);
+			//symReg.Visit(parser.compilationUnit());
 			//var symbolReg = new SymbolRegistrationListener(rootSymbol);
 			//ParseTreeWalker.Default.Walk(symbolReg, parser.file());
 			var symbolRes = new SymbolResolutionListener(rootSymbol);

@@ -2,12 +2,11 @@ using System;
 
 namespace Cova.Model
 {
-    public sealed class Property : Symbol
+    public sealed class Property : SymbolNamedStorageReferencing
     {
         private Property() {}
-        public Property(DefinitionSource definitionSource, String name) : base(definitionSource) => Name = name;
+        public Property(DefinitionSource definitionSource, String name) : base(definitionSource, name) {}
 
-        public String Name { get; set; } = null!;
         public Function? Getter { get; set; }
         public Function? Setter { get; set; }
     }

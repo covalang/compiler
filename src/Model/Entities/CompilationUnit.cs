@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Cova.Model
 {
-    public sealed class Module :
-        ScopeNamed,
+    public sealed class CompilationUnit :
+        Scope,
         IHasChildren<Type>,
         IHasChildren<Function>,
         IHasChildren<Namespace>,
         IHasChildren<Alias>
     {
-        private Module() {}
-        public Module(DefinitionSource definitionSource, String name) : base(definitionSource, name) {}
+        private CompilationUnit() {}
+        public CompilationUnit(DefinitionSource definitionSource) : base(definitionSource) {}
         
         public List<Type> Types { get; } = new();
         public List<Function> Functions { get; } = new();

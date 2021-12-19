@@ -7,7 +7,10 @@ Usage:
 Commands:
 
 	new
+        <template>
 	run
+        -c | --configuration <Debug|Release>
+        
 	test
 	build
 	clean

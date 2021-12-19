@@ -4,8 +4,19 @@ options {
 	tokenVocab = CovaLexer;
 }
 
-file: (namespaceBody | Newline)* EOF;
+compilationUnit: compilationUnitBody EOF;
 
+compilationUnitBody
+    : dentedBodyBegin (compilationUnitMember | dentedBodyContinue)* dentedBodyEnd
+    ;
+
+compilationUnitMember
+	: useNamespaceStatement
+	| namespaceDefinition
+	| typeDefinition
+	| functionDefinition
+	| statement
+	;
 
 dentedBodyBegin: dentedIgnorable* Indent;
 dentedBodyContinue: dentedIgnorable* (Dent | SemiColon Whitespace+);
@@ -30,15 +41,22 @@ anyWhitespace: (Newline | Tab | Whitespace)+;
 
 
 namespaceMemberDefinition
-	: namespaceDefinition
+	: useNamespaceStatement
+	| namespaceDefinition
 	| typeDefinition
 	| functionDefinition
 	| statement
 	;
+	
+useNamespaceStatement
+	: Use Whitespace+ Namespace Whitespace+ qualifiedIdentifier;
 
 namespaceDefinition
-	: Namespace Whitespace+ qualifiedIdentifier (Whitespace+ visibility)? namespaceBody?
+	: Namespace Whitespace+ namespaceIdentifiers namespaceBody?
 	;
+	
+namespaceIdentifiers: namespaceIdentifier (Dot namespaceIdentifier)*;
+namespaceIdentifier: Identifier;
 
 namespaceBody
 	: dentedBodyBegin (namespaceMemberDefinition | dentedBodyContinue)* dentedBodyEnd
@@ -64,27 +82,28 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ type (Whitespace+ visibility)?
+	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ qualifiedType (Whitespace+ visibility)?
 	;
 
 propertyDefinition
-	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ type
+	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ qualifiedType
 	;
 
 functionDefinition
-	: Func Whitespace+ identifier typeParameters? parameters? (Whitespace+ type)? (Whitespace+ visibility)? body?
+	: Func Whitespace+ identifier typeParameters? parameters? (Whitespace+ qualifiedType)? (Whitespace+ visibility)? body?
 	;
 
 typeParameters: LeftChevron typeParameter (Comma Whitespace+ typeParameter)* RightChevron;
-typeParameter: type (Whitespace+ Colon Whitespace+ type)?;
+typeParameter: qualifiedType (Whitespace+ Colon Whitespace+ qualifiedType)?;
 
 typeArguments: LeftChevron typeArgument (Comma Whitespace+ typeArgument)* RightChevron;
-typeArgument: type;
+typeArgument: qualifiedType;
 
 parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
-parameter: identifier (Whitespace+ type)?;
+parameter: identifier (Whitespace+ qualifiedType)?;
 
-type: qualifiedIdentifier typeArguments?;
+qualifiedType: type (Dot type)*;
+type: identifier typeArguments?;
 
 body
 	: dentedBodyBegin (statement | dentedBodyContinue)* dentedBodyEnd

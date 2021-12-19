@@ -2,11 +2,9 @@ using System;
 
 namespace Cova.Model
 {
-    public sealed class Local : Symbol
+    public sealed class Local : SymbolNamedStorageReferencing
     {
         private Local() {}
-        public Local(DefinitionSource definitionSource, String name) : base(definitionSource) => Name = name;
-
-        public String Name { get; set; } = null!;
+        public Local(DefinitionSource definitionSource, String name) : base(definitionSource, name) {}
     }
 }

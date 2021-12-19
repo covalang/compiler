@@ -71,7 +71,7 @@ public sealed class LinearHelper
 	}
 
 	private CommonToken CreateToken() =>
-		new(currentToken)
+		new(currentToken ?? throw new InvalidOperationException("The current token must not be null. Something is probably seriously wrong here."))
 		{
 			Type = linearBodyEnd.tokenType,
 			Text = linearBodyEnd.name,

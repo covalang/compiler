@@ -2,5 +2,8 @@
 
 namespace Cova.Model
 {
-    public interface IHasName { String Name { get; set; } }
+    public interface IHasName
+    {
+        String Name { get; set; }
+    }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Cova.Symbols
@@ -21,7 +22,7 @@ namespace Cova.Symbols
 
 	public interface IScope : ISymbol
 	{
-		OrderedSet<IScope> Imported { get; set; }
+		List<IScope> Imported { get; }
 	}
 
 	public interface IStorageReferencing
@@ -44,8 +45,8 @@ namespace Cova.Symbols
 	public interface ITypeAlias : IAlias<IType>, IHasName {}
 
 	public interface IPackage : ISymbol, IHasName, IHasModules {}
-	public interface IModule : ISymbol, IScope, IHasName, IHasTypes, IHasFunctions, IHasNamespaces, IHasAliases {}
-	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasAliases, IHasTypes, IHasFunctions {}
+	public interface IModule : ISymbol, IScope, IHasName, IHasNamespaces, IHasTypes, IHasAliases, IHasFunctions {}
+	public interface INamespace : ISymbol, IScope, IHasName, IHasNamespaces, IHasTypes, IHasAliases, IHasFunctions {}
 
 	public interface IFunction : ISymbol, IScope, IHasName, IHasTypeReference, IHasParameters, IHasLocals, IHasStatements, IStorageReferencing { }
 	public interface IGenericFunction : IFunction, IHasTypeParameters {}
@@ -64,6 +65,7 @@ namespace Cova.Symbols
 		IFunction Getter { get; set; }
 		IFunction Setter { get; set; }
 	}
+
 	public interface IStatement : ISymbol {}
 
 	public interface IParameter : ISymbol, IHasName, IHasTypeReference, IStorageReferencing {}
@@ -76,7 +78,7 @@ namespace Cova.Symbols
 	public interface IClass : IType, IExtends<IClass>, IImplements<IInterface> {}
 	
 	public interface IHasParent<TParent> { TParent Parent { get; set; } }
-	public interface IHasChildren<TChild> { OrderedSet<TChild> Children { get; set; } }
+	public interface IHasChildren<TChild> { List<TChild> Children { get; } }
 	public interface IHasDefinitionSource { DefinitionSource DefinitionSource { get; set; } }
 
 	public interface IHasName { String Name { get; set; } }
@@ -90,21 +92,21 @@ namespace Cova.Symbols
 	public interface IHasInstanceDependency { InstanceDependency InstanceDependency { get; set; } }
 	public interface IHasThreadShareability { ThreadShareability ThreadShareability { get; set; } }
 	
-	public interface IHasModules { OrderedSet<IModule> Modules { get; set; } }
-	public interface IHasScopes { OrderedSet<IScope> Scopes { get; set; } }
-	public interface IHasAliases { OrderedSet<IAlias> Aliases { get; set; } }
-	public interface IHasNamespaces { OrderedSet<INamespace> Namespaces { get; set; } }
-	public interface IHasTypes { OrderedSet<IType> Types { get; set; } }
-	public interface IHasInterfaces { OrderedSet<IType> Interfaces { get; set; } }
-	public interface IHasTraits { OrderedSet<IType> Traits { get; set; } }
-	public interface IHasFields { OrderedSet<IField> Fields { get; set; } }
-	public interface IHasProperties { OrderedSet<IProperty> Properties { get; set; } }
-	public interface IHasFunctions { OrderedSet<IFunction> Functions { get; set; } }
-	public interface IHasParameters { OrderedSet<IParameter> Parameters { get; set; } }
-	public interface IHasLocals { OrderedSet<ILocal> Locals { get; set; } }
-	public interface IHasStatements { OrderedSet<IStatement> Statements { get; set; } }
-	public interface IHasTypeParameters { OrderedSet<ITypeParameter> TypeParameters { get; set; } }
+	public interface IHasModules { List<IModule> Modules { get; }}
+	public interface IHasScopes { List<IScope> Scopes { get; } }
+	public interface IHasAliases { List<IAlias> Aliases { get; } }
+	public interface IHasNamespaces { List<INamespace> Namespaces { get; } }
+	public interface IHasTypes { List<IType> Types { get; } }
+	public interface IHasInterfaces { List<IType> Interfaces { get; } }
+	public interface IHasTraits { List<IType> Traits { get; } }
+	public interface IHasFields { List<IField> Fields { get; } }
+	public interface IHasProperties { List<IProperty> Properties { get; } }
+	public interface IHasFunctions { List<IFunction> Functions { get; } }
+	public interface IHasParameters { List<IParameter> Parameters { get; } }
+	public interface IHasLocals { List<ILocal> Locals { get; } }
+	public interface IHasStatements { List<IStatement> Statements { get; } }
+	public interface IHasTypeParameters { List<ITypeParameter> TypeParameters { get; } }
 	
-	public interface IExtends<TType> where TType : IType { OrderedSet<IType> Extends { get; set; } }
-	public interface IImplements<TType> where TType : IType { OrderedSet<IType> Implements { get; set; } }
+	public interface IExtends<TType> where TType : IType { List<IType> Extends { get; } }
+	public interface IImplements<TType> where TType : IType { List<IType> Implements { get; } }
 }

@@ -1,8 +1,10 @@
 ﻿namespace Cova.Model
 {
-    public sealed class NamespaceImport : Alias<Namespace>
+    public sealed class NamespaceImport : Symbol
     {
         private NamespaceImport() {}
-        public NamespaceImport(DefinitionSource definitionSource, Namespace aliased) : base(definitionSource, aliased) {}
+        public NamespaceImport(DefinitionSource definitionSource, QualifiedSymbolReference symbolReference) : base(definitionSource) => SymbolReference = symbolReference;
+
+        public QualifiedSymbolReference SymbolReference { get; set; } = null!;
     }
 }

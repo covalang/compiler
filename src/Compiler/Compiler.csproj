@@ -6,6 +6,7 @@
 		<AssemblyName>cova</AssemblyName>
 		<RootNamespace>Cova</RootNamespace>
 		<Nullable>enable</Nullable>
+		<WarningsAsErrors>Nullable</WarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>

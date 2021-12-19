@@ -1,4 +1,4 @@
 ﻿namespace Cova.Model
 {
-    public interface IModule : ISymbol, IScope, IHasName, IHasNamespaces, IHasTypes, IHasAliases, IHasFunctions {}
+    public interface IModule : IScope, IHasName, IHasNamespaces, IHasTypes, IHasAliases, IHasFunctions {}
 }

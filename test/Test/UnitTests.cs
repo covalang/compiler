@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
+using Cova.Compiler.Parser.Grammar;
 //using Antlr4.Runtime.Tree;
 using Xunit;
 

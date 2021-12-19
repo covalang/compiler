@@ -105,7 +105,7 @@ public sealed class DentHelper
 	}
 
 	private CommonToken CreateToken(Int32 type, String displayText) =>
-		new(currentToken)
+		new(currentToken ?? throw new InvalidOperationException("The current token must not be null. Something is probably seriously wrong here."))
 		{
 			Type = type,
 			Text = displayText,

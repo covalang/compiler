@@ -1,3 +1,5 @@
+using System;
+
 namespace Cova.Model
 {
     public sealed class DefinitionSource : EntityBase
