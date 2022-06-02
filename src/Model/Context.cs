@@ -35,7 +35,7 @@ namespace Cova.Model
             //modelBuilder.RemovePluralizingTableNameConvention();
 
             modelBuilder.Entity<Namespace>().HasIndex(x => new {x.ParentNamespaceId, x.Name}).IsUnique();
-            this.Database.ExecuteSqlInterpolated($"create unique index");
+            //this.Database.ExecuteSqlInterpolated($"create unique index");
 
             // foreach (var entity in modelBuilder.Model.GetEntityTypes())
             //     foreach (var property in entity.GetProperties())
