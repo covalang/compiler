@@ -46,7 +46,7 @@ namespace Cova
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
                 @namespace = db.Namespaces.Single(x => x.ParentNamespace == @namespace.ParentNamespace && x.Name == @namespace.Name);
             }
