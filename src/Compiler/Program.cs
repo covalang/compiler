@@ -6,7 +6,7 @@ using Antlr4.Runtime.Tree;
 using Cova.Compiler.Parser;
 using Cova.Compiler.Parser.Grammar;
 using Cova.Scopes;
-using LLVMSharp.Interop;
+//using LLVMSharp.Interop;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -149,17 +149,17 @@ namespace Cova
 		}
 	}
 
-	sealed class LLVMInitializer : IDisposable
-	{
-		public LLVMInitializer()
-		{
-			LLVM.InitializeNativeTarget();
-			LLVM.InitializeAllAsmParsers();
-			LLVM.InitializeAllAsmPrinters();
-		}
-
-		public void Dispose() => LLVM.Shutdown();
-	}
+	// sealed class LLVMInitializer : IDisposable
+	// {
+	// 	public LLVMInitializer()
+	// 	{
+	// 		LLVM.InitializeNativeTarget();
+	// 		LLVM.InitializeAllAsmParsers();
+	// 		LLVM.InitializeAllAsmPrinters();
+	// 	}
+	//
+	// 	public void Dispose() => LLVM.Shutdown();
+	// }
 
 	class Raii : IDisposable
 	{
