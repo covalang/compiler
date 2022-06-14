@@ -35,3 +35,5 @@ AntlrOutput/
 .idea
 **/gen
 CMakeFiles/
+
+node_modules/

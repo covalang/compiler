@@ -1,0 +1,34 @@
+{
+	"name": "cova-vscode-extension",
+	"displayName": "cova",
+	"version": "0.0.1",
+	"description": "Cova language support for VS Code",
+	"publisher": "nick.strupat",
+	"scripts": {
+		"compile": "tsc -b",
+		"compile-server": "dotnet build ../Cli/Cli.csproj -c Release -o ./out/server"
+	},
+	"engines": {
+		"vscode": "^1.67.0"
+	},
+	"activationEvents": [
+		"onLanguage:plaintext"
+	],
+	"main": "./out/extension.js",
+	"keywords": [
+		"cova",
+		"covalang",
+		"cova-lang",
+		"dotnet"
+	],
+	"author": "Nick Strupat",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^17.0.42",
+		"@types/vscode": "^1.68.0",
+		"typescript": "^4.7.3"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^8.0.1"
+	}
+}
