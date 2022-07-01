@@ -15,6 +15,19 @@
 		"onLanguage:plaintext"
 	],
 	"main": "./out/extension.js",
+	"contributes": {
+		"languages": [{
+			"id": "cova",
+			"aliases": ["cova"],
+			"extensions": [".cova"],
+			"configuration": "./language-configuration.json"
+		}],
+		"grammars": [{
+			"language": "cova",
+			"scopeName": "source.cova",
+			"path": "./syntaxes/cova.tmLanguage.json"
+		}]
+	},
 	"keywords": [
 		"cova",
 		"covalang",

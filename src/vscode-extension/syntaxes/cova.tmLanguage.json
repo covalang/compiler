@@ -1,0 +1,46 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "cova",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#characters"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.cova",
+				"match": "\\b(use|qual|type|enum|class|struct|interface|trait|field|prop|func|init|fini|local|for|map|fold|join|true|false|and|or|not|is|isnt)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.cova",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.cova",
+					"match": "\\\\."
+				}
+			]
+		},
+		"characters": {
+			"name": "characters.quoted.single.cova",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"name": "constant.character.escape.cova",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.cova"
+}
