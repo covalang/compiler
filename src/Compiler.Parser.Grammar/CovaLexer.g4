@@ -31,6 +31,9 @@ FuncOf: 'func-of';
 FieldOf: 'field-of';
 PropOf: 'prop-of';
 
+Then: 'then';
+Else: 'else';
+
 // Storage types
 
 StaticStorageType : '$';
@@ -81,6 +84,7 @@ Tilde: '~';
 Underscore: '_';
 
 Dot: '.';
+At: '@';
 
 Equals: '=';
 
@@ -154,6 +158,6 @@ RightBrace: '}';
 
 Newline: '\r\n' | '\r' | '\n';
 Tab: '\t';
-Whitespace: [\p{White_Space}];
+Ws: [\p{White_Space}];
 Comment: '///' .*? Newline -> skip;
 MultilineComment: '/*' .*? '*/' -> skip;

@@ -7,8 +7,9 @@ options {
 compilationUnit: compilationUnitBody EOF;
 
 compilationUnitBody
-    : dentedBodyBegin (compilationUnitMember | dentedBodyContinue)* dentedBodyEnd
-    ;
+	: dentedBodyBegin (compilationUnitMember | dentedBodyContinue)* dentedBodyEnd // lexer should be emitting dent tokens at start and end of file
+	| compilationUnitMember (Newline+ compilationUnitMember)*
+	;
 
 compilationUnitMember
 	: useNamespaceStatement
@@ -19,14 +20,14 @@ compilationUnitMember
 	;
 
 dentedBodyBegin: dentedIgnorable* Indent;
-dentedBodyContinue: dentedIgnorable* (Dent | SemiColon Whitespace+);
+dentedBodyContinue: dentedIgnorable* (Dent | SemiColon Ws+);
 dentedBodyEnd: dentedIgnorable* Dedent;
 
 dentedIgnorable: Newline | Tab;
 
 
-linearBodyBegin: Whitespace+ Arrow Whitespace+;
-linearBodyContinue: Whitespace+ Comma;
+linearBodyBegin: Ws+ Arrow Ws+;
+linearBodyContinue: Ws+ Comma;
 linearBodyEnd: anyWhitespace? LinearBodyEnd;
 
 
@@ -37,26 +38,39 @@ bracedBodyEnd: anyWhitespace? RightBrace;
 //bracedIgnorable: Newline | Tab | Whitespace | Indent | Dent | Dedent;
 
 
-anyWhitespace: (Newline | Tab | Whitespace)+;
+anyWhitespace: (Newline | Tab | Ws)+;
 
 
-namespaceMemberDefinition
-	: useNamespaceStatement
-	| namespaceDefinition
-	| typeDefinition
-	| functionDefinition
-	| statement
-	;
-	
+
+
+typeIdentifier: identifier typeParameters?;
+typeParameters: LeftChevron typeParameter (Comma Ws+ typeParameter)* RightChevron;
+typeParameter: identifier (Ws+ Colon Ws+ typeExpression)?;
+
+qualifiedTypeIdentifierReference: (typeOrNamespaceIdentifierReference Dot)* typeOrNamespaceIdentifierReference;
+typeOrNamespaceIdentifierReference: identifier typeArguments?;
+
+typeArguments: LeftChevron typeArgument (Comma Ws+ typeArgument)* RightChevron;
+typeArgument: typeExpression;
+
+
+
+
 useNamespaceStatement
-	: Use Whitespace+ Namespace Whitespace+ qualifiedIdentifier;
+	: Use Ws+ Namespace Ws+ qualifiedNamespaceIdentifier
+	;
+
+qualifiedNamespaceIdentifier
+	: namespaceIdentifier (Dot namespaceIdentifier)*
+	;
+
+namespaceIdentifier
+	: Identifier
+	;
 
 namespaceDefinition
-	: Namespace Whitespace+ namespaceIdentifiers namespaceBody?
+	: Namespace Ws+ qualifiedNamespaceIdentifier namespaceBody?
 	;
-	
-namespaceIdentifiers: namespaceIdentifier (Dot namespaceIdentifier)*;
-namespaceIdentifier: Identifier;
 
 namespaceBody
 	: dentedBodyBegin (namespaceMemberDefinition | dentedBodyContinue)* dentedBodyEnd
@@ -64,9 +78,24 @@ namespaceBody
 	| linearBodyBegin (namespaceMemberDefinition | linearBodyContinue)* linearBodyEnd
 	;
 
-typeDefinition
-	: Type Whitespace+ (typeKind Whitespace+)? identifier typeParameters? (Whitespace+ visibility)? typeBody?
+
+namespaceMemberDefinition
+	: namespaceDefinition
+	| typeDefinition
+	| functionDefinition
+	| statement
 	;
+
+typeDefinition
+	: Type Ws+ typeIdentifier (Ws+ typeKind)? (Ws+ typeModifier+)? (Ws+ visibility) typeBody?
+	;
+
+anonymousTypeDefinition
+	: Type Ws+ (Ws+ typeKind)? (Ws+ typeModifier+)? (Ws+ visibility)? typeBody?
+	;
+
+typeModifier: storageType | referenceSemantics | nullability;
+storageModifier: storageType | referenceSemantics | nullability;
 
 typeBody
 	: dentedBodyBegin (typeMemberDefinition | dentedBodyContinue)* dentedBodyEnd
@@ -82,28 +111,28 @@ typeMemberDefinition
 	;
 
 fieldDefinition
-	: Field Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ qualifiedType (Whitespace+ visibility)?
+	: Field Ws+ identifier (Ws+ storageType)? Ws+ qualifiedTypeIdentifierReference (Ws+ visibility)?
 	;
 
 propertyDefinition
-	: Prop Whitespace+ identifier (Whitespace+ storageType)? Whitespace+ qualifiedType
+	: Prop Ws+ identifier (Ws+ storageType)? Ws+ qualifiedTypeIdentifierReference
 	;
 
 functionDefinition
-	: Func Whitespace+ identifier typeParameters? parameters? (Whitespace+ qualifiedType)? (Whitespace+ visibility)? body?
+	: Func Ws+ identifier typeParameters? parameters? (Ws+ storageType)? (Ws+ nullability)? (Ws+ qualifiedTypeIdentifierReference)? (Ws+ visibility)? body?
 	;
 
-typeParameters: LeftChevron typeParameter (Comma Whitespace+ typeParameter)* RightChevron;
-typeParameter: qualifiedType (Whitespace+ Colon Whitespace+ qualifiedType)?;
+typeExpression
+//	: logicalOperator Whitespace* typeExpression            #unaryTypeExpression
+	: typeExpression Ws* logicalOperator Ws* typeExpression #binaryTypeExpression
+	| qualifiedTypeIdentifierReference                      #unaryTypeExpression
+	| anonymousTypeDefinition                               #anonymousTypeExpression
+	| literal                                               #literalTypeExpression
+	;
 
-typeArguments: LeftChevron typeArgument (Comma Whitespace+ typeArgument)* RightChevron;
-typeArgument: qualifiedType;
+parameters: LeftParenthesis parameter (Comma Ws+ parameter)* RightParenthesis;
+parameter: identifier (Ws+ qualifiedTypeIdentifierReference)?;
 
-parameters: LeftParenthesis parameter (Comma Whitespace+ parameter)* RightParenthesis;
-parameter: identifier (Whitespace+ qualifiedType)?;
-
-qualifiedType: type (Dot type)*;
-type: identifier typeArguments?;
 
 body
 	: dentedBodyBegin (statement | dentedBodyContinue)* dentedBodyEnd
@@ -113,13 +142,11 @@ body
 	
 scope: Scope anyWhitespace? body;
 
-qualifiedIdentifier
-	: identifier (Dot identifier)*
-	;
-
-identifier
-	: Identifier
-	;
+qualifiedIdentifier: symbolIdentifier (Dot symbolIdentifier)*;
+symbolIdentifier: identifier typeArguments?;
+identifierDefinition: Identifier;
+genericIdentifierDefinition: Identifier typeParameters;
+identifier: Identifier;
 
 
 visibility
@@ -139,7 +166,19 @@ visibility
 storageType : staticStorageType;// | instanceStorageType;
 	staticStorageType : StaticStorageType;
 	//instanceStorageType : InstanceStorageType;
+	
+referenceSemantics
+    : At #mutable
+    | Asterisk #mutableToMutable
+    | Caret #mutableToImmutable
+    | Ampersand #immutableToMutable
+    | Percent #immutableToImmutable
+    ;
 
+nullability
+    : Question #nullable
+    //| Exclamation #nonNullable
+    ;
 
 typeKind : enumTypeKind | structTypeKind | interfaceTypeKind | traitTypeKind | delegateTypeKind;
 
@@ -160,11 +199,11 @@ statement
 
 //localDefinition: Local Whitespace+ identifier (Whitespace+ qualifiedIdentifier);
 localDeclaration
-	: Local Whitespace+ identifier (Whitespace+ type)
-	| Local Whitespace+ identifier (Whitespace+ type)? (Whitespace+ assignmentOperator anyWhitespace+ expression)
+	: Local Ws+ identifier (Ws+ qualifiedTypeIdentifierReference)
+	| Local Ws+ identifier (Ws+ qualifiedTypeIdentifierReference)? (Ws+ assignmentOperator anyWhitespace+ expression)
 	;
 
-assignment : qualifiedIdentifier Whitespace+ assignmentOperator Whitespace* expression;
+assignment : qualifiedIdentifier Ws+ assignmentOperator Ws* expression;
 
 assignmentOperator: Equals;
 
@@ -177,7 +216,7 @@ invocation : qualifiedIdentifier LeftParenthesis arguments? RightParenthesis;
 // 	: unaryExpression identityOperator unaryExpression
 // 	;
 
-memberAccessOperator: Whitespace Dot;
+memberAccessOperator: Ws Dot;
 
 identityOperator: isOperator | isntOperator;
 isOperator: Is;
@@ -206,26 +245,42 @@ isntOperator: Isnt;
 logicalOperator
 	: andOperator
 	| orOperator
-	;
+	; 
 
 andOperator: And;
 orOperator: Or;
 notOperator: Not;
 
+conditionalOperator
+    : thenOperator
+    | elseOperator
+    ;
+	
+thenOperator: Then;
+elseOperator: Else;
+
 bitwiseOperator
 	: bitwiseAndOperator
 	| bitwiseOrOperator
 	| bitwiseXorOperator
+	| bitwiseLeftShiftOperator
+	| bitwiseRightShiftOperator
+	| bitwiseLeftRotateOperator
+	| bitwiseRightRotateOperator
 	;
 
 bitwiseAndOperator: Ampersand;
 bitwiseOrOperator: VerticalBar;
 bitwiseXorOperator: Caret;
 bitwiseNotOperator: Tilde;
+bitwiseLeftShiftOperator: LeftChevron LeftChevron;
+bitwiseRightShiftOperator: RightChevron RightChevron;
+bitwiseLeftRotateOperator: LeftChevron LeftChevron LeftChevron;
+bitwiseRightRotateOperator: RightChevron RightChevron RightChevron;
 
 arithmeticOperator
 	: additionOperator
-	| Whitespace subtractionOperator Whitespace
+	| Ws subtractionOperator Ws
 	| multiplicationOperator
 	| divisionOperator
 	| moduloOperator
@@ -296,16 +351,17 @@ unaryOperator
 	| bitwiseNotOperator
 	| subtractionOperator
 	| rootOperator
-	| nameOfOperator Whitespace
-	| funcOfOperator Whitespace
-	| fieldOfOperator Whitespace
-	| propOfOperator Whitespace
+	| nameOfOperator Ws
+	| funcOfOperator Ws
+	| fieldOfOperator Ws
+	| propOfOperator Ws
 	;
 
 binaryOperator
 	: memberAccessOperator
 	| identityOperator
 	| logicalOperator
+	| conditionalOperator
 	| bitwiseOperator
 	| arithmeticOperator
 	| relationalOperator
@@ -319,12 +375,12 @@ binaryOperator
 	;
 
 expression
-	: LeftParenthesis Whitespace* arguments Whitespace* RightParenthesis                                   #parenthesisExpression
+	: LeftParenthesis Ws* arguments Ws* RightParenthesis                                   #parenthesisExpression
 	| LeftBracket anyWhitespace? arguments anyWhitespace? RightBracket                                     #bracketExpression
 	| expression LeftParenthesis arguments? RightParenthesis                                               #invocationExpression
 	| (parameter | parameters) body                                                                        #closureExpression
-	| unaryOperator expression                                                                             #unaryExpression
-	| expression Whitespace* binaryOperator Whitespace* expression                                         #binaryExpression
+	| unaryOperator Ws* expression                                                                 #unaryExpression
+	| expression Ws* binaryOperator Ws* expression                                         #binaryExpression
 	// | expression Whitespace+ arithmeticOperator Whitespace+ expression                                     #arithmeticExpression
 	// | expression Whitespace+ rootOperator Whitespace+ expression                                           #rootExpression
 	// | expression Whitespace+ relationalOperator Whitespace+ expression                                     #relationalExpression
@@ -355,11 +411,15 @@ bodyExpression
 	;
 
 atom
+	: literal
+	| qualifiedIdentifier
+	;
+
+literal
 	: booleanLiteral
 	| integerLiteral
 	| realLiteral
 	| stringLiteral
-	| qualifiedIdentifier
 	;
 
 booleanLiteral
