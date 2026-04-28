@@ -1,12 +1,7 @@
-﻿using System.Reflection;
-using ConsoleAppFramework;
+﻿using ConsoleAppFramework;
 using Microsoft.Extensions.DependencyInjection;
 using NoAlloq;
-// using static CmdLn;
 
-var sc = new ServiceCollection();
-
-//ConsoleApp.ServiceProvider = sc.BuildServiceProvider();
 var cab = ConsoleApp.Create();
 cab.ConfigureServices((cac, services) =>
 {
